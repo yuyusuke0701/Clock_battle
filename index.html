@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>シンカリオン とけいマスター！</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0f172a;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            color: #fff;
+        }
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            /* 横長サイズを拡大 (max-width: 1100px) */
+            max-width: 1100px;
+            max-height: 520px;
+            background: linear-gradient(to bottom, #38bdf8, #bae6fd);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        /* スクロールする地面 */
+        .scenery {
+            position: absolute;
+            bottom: 0;
+            width: 200%;
+            height: 70px;
+            background: #22c55e;
+            border-top: 6px solid #15803d;
+            background-image: linear-gradient(90deg, rgba(255,255,255,0.15) 50%, transparent 50%);
+            background-size: 80px 80px;
+        }
+
+        /* シンカリオン＆敵：高さ一定、センター合わせ (height: 440px) */
+        #player {
+            position: absolute;
+            bottom: 40px;
+            left: 60px;
+            width: 320px;
+            height: 440px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center; /* イラストのセンターを配置場所のセンターに合わせる */
+            z-index: 5;
+            transition: transform 0.1s;
+        }
+        #enemy {
+            position: absolute;
+            bottom: 40px;
+            right: 60px;
+            width: 320px;
+            height: 440px;
+            background-image: url('images/CW_Shin/hades.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center; /* イラストのセンターを配置場所のセンターに合わせる */
+            z-index: 5;
+        }
+
+        /* 時計エリア */
+        #clock-area {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 330px;
+            height: 330px;
+            z-index: 10;
+        }
+        #clock-face {
+            width: 100%;
+            height: 100%;
+            background-image: url('images/tokei_form.jpg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .hand-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* UIパネル（上部情報） */
+        #ui-panel {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            display: flex;
+            gap: 15px;
+            z-index: 20;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+        }
+        .badge {
+            background: rgba(0,0,0,0.6);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 2px solid #fff;
+        }
+
+        /* 操作パネル（下部） */
+        #bottom-panel {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 600px;
+            background: rgba(15, 23, 42, 0.92);
+            border: 3px solid #38bdf8;
+            border-radius: 14px;
+            padding: 6px 12px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 20;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        .picker-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 10px;
+        }
+        .picker {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .picker button {
+            background: #f59e0b;
+            border: none;
+            color: white;
+            width: 38px;
+            height: 24px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 0 #b45309;
+        }
+        .picker button:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+        .picker-val {
+            font-size: 20px;
+            font-weight: bold;
+            width: 55px;
+            text-align: center;
+            color: #fef08a;
+            margin: 1px 0;
+        }
+        .picker-label {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        #decide-btn {
+            background: #ec4899;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #be185d;
+            letter-spacing: 1px;
+        }
+        #decide-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #be185d;
+        }
+
+        /* メッセージ */
+        #message-overlay {
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            font-weight: bold;
+            color: #fde047;
+            text-shadow: 3px 3px 0 #000, -2px -2px 0 #000;
+            display: none;
+            z-index: 100;
+            text-align: center;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="ui-panel">
+        <div class="badge" id="stage-text">ステージ: 1</div>
+        <div class="badge" id="score-text">たおしたてき: 0</div>
+    </div>
+
+    <div id="message-overlay">ステージクリア！</div>
+
+    <!-- 大きな時計 -->
+    <div id="clock-area">
+        <div id="clock-face">
+            <canvas id="handCanvas" width="330" height="330" class="hand-canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- 背景・キャラクター・敵 -->
+    <div class="scenery" id="scenery"></div>
+    <div id="player" style="background-image: url('images/CW_Shin/e5hayabusa.png');"></div>
+    <div id="enemy"></div>
+
+    <!-- 操作パネル -->
+    <div id="bottom-panel">
+        <div class="picker-group">
+            <div class="picker">
+                <button onclick="changeHour(1)">▲</button>
+                <span class="picker-val" id="hour-display">3じ</span>
+                <button onclick="changeHour(-1)">▼</button>
+            </div>
+            <span class="picker-label" style="color: #60a5fa;">じ</span>
+        </div>
+
+        <div class="picker-group">
+            <div class="picker">
+                <button onclick="changeMinute()">▲▼</button>
+                <span class="picker-val" id="minute-display">00ふん</span>
+            </div>
+            <span class="picker-label" style="color: #f87171;">ふん</span>
+        </div>
+
+        <button id="decide-btn" onclick="checkAnswer()">けってい</button>
+    </div>
+</div>
+
+<script>
+    let currentHour = 3;
+    let currentMinute = 0;
+    let targetHour = 3;
+    let targetMinute = 0;
+    let stage = 1;
+    let score = 0;
+    let isLocked = false;
+
+    function playSound(type) {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+                osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.4);
+            } else {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(140, ctx.currentTime);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            }
+        } catch(e) {}
+    }
+
+    function drawClockHands(hour, minute) {
+        const canvas = document.getElementById('handCanvas');
+        const ctx = canvas.getContext('2d');
+        const cx = 165;
+        const cy = 165;
+        const scale = 1.5;
+
+        ctx.clearRect(0, 0, 330, 330);
+
+        // 時針（青）
+        ctx.save();
+        ctx.translate(cx, cy);
+        const hourAngle = ((hour % 12 + minute / 60) / 12) * 2 * Math.PI - Math.PI / 2;
+        ctx.rotate(hourAngle);
+        ctx.beginPath();
+        ctx.moveTo(-6 * scale, -6 * scale);
+        ctx.lineTo(50 * scale, -6 * scale);
+        ctx.lineTo(60 * scale, 0);
+        ctx.lineTo(50 * scale, 6 * scale);
+        ctx.lineTo(-6 * scale, 6 * scale);
+        ctx.closePath();
+        ctx.fillStyle = '#0284c7';
+        ctx.fill();
+        ctx.lineWidth = 1.5 * scale;
+        ctx.strokeStyle = '#000';
+        ctx.stroke();
+        ctx.restore();
+
+        // 分針（赤）
+        ctx.save();
+        ctx.translate(cx, cy);
+        const minAngle = (minute / 60) * 2 * Math.PI - Math.PI / 2;
+        ctx.rotate(minAngle);
+        ctx.beginPath();
+        ctx.moveTo(-5 * scale, -5 * scale);
+        ctx.lineTo(70 * scale, -5 * scale);
+        ctx.lineTo(80 * scale, 0);
+        ctx.lineTo(70 * scale, 5 * scale);
+        ctx.lineTo(-5 * scale, 5 * scale);
+        ctx.closePath();
+        ctx.fillStyle = '#ef4444';
+        ctx.fill();
+        ctx.lineWidth = 1.5 * scale;
+        ctx.strokeStyle = '#000';
+        ctx.stroke();
+        ctx.restore();
+
+        // 中心ピン
+        ctx.beginPath();
+        ctx.arc(cx, cy, 5 * scale, 0, 2 * Math.PI);
+        ctx.fillStyle = '#000';
+        ctx.fill();
+    }
+
+    function generateQuestion() {
+        targetHour = Math.floor(Math.random() * 12) + 1;
+        targetMinute = Math.random() < 0.5 ? 0 : 30;
+        drawClockHands(targetHour, targetMinute);
+    }
+
+    function changeHour(delta) {
+        if (isLocked) return;
+        currentHour += delta;
+        if (currentHour > 12) currentHour = 1;
+        if (currentHour < 1) currentHour = 12;
+        document.getElementById('hour-display').innerText = currentHour + "じ";
+    }
+
+    function changeMinute() {
+        if (isLocked) return;
+        currentMinute = currentMinute === 0 ? 30 : 0;
+        document.getElementById('minute-display').innerText = (currentMinute === 0 ? "00" : "30") + "ふん";
+    }
+
+    function checkAnswer() {
+        if (isLocked) return;
+
+        if (currentHour === targetHour && currentMinute === targetMinute) {
+            isLocked = true;
+            playSound('correct');
+            score++;
+            document.getElementById('score-text').innerText = "たおしたてき: " + score;
+
+            const msg = document.getElementById('message-overlay');
+            msg.innerText = "てきを たおした！\nステージクリア！";
+            msg.style.display = "block";
+
+            const enemy = document.getElementById('enemy');
+            const player = document.getElementById('player');
+            const scenery = document.getElementById('scenery');
+
+            let pos = 0;
+            const anim = setInterval(() => {
+                pos += 6;
+                scenery.style.backgroundPositionX = (-pos) + "px";
+                player.style.transform = "translateY(" + (pos % 12 > 6 ? -5 : 0) + "px)";
+                if (pos > 160) {
+                    clearInterval(anim);
+                    enemy.style.display = "none";
+                }
+            }, 30);
+
+            setTimeout(() => {
+                msg.style.display = "none";
+                stage++;
+                document.getElementById('stage-text').innerText = "ステージ: " + stage;
+                player.style.transform = "none";
+                enemy.style.display = "block";
+                generateQuestion();
+                isLocked = false;
+            }, 2000);
+
+        } else {
+            playSound('wrong');
+            const msg = document.getElementById('message-overlay');
+            msg.innerText = "ざんねん！\nもういちど チャレンジ！";
+            msg.style.display = "block";
+            setTimeout(() => {
+                msg.style.display = "none";
+            }, 1200);
+        }
+    }
+
+    generateQuestion();
+</script>
+
+</body>
+</html>
