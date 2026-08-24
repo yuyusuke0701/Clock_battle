@@ -10,28 +10,34 @@
             user-select: none;
             -webkit-user-select: none;
         }
-        body {
+        html, body {
             margin: 0;
             padding: 0;
+            height: 100%;
+        }
+        body {
             background: #0f172a;
             font-family: 'Helvetica Neue', Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
+            width: 100vw;
             height: 100vh;
             overflow: hidden;
             color: #fff;
         }
+        /* ゲーム画面は常に1100x520の固定レイアウトとして作り、
+           画面サイズに合わせてJSでtransform: scale()するだけにする。
+           → 縦向き・横向きどちらでも配置比率が崩れず、重なり方が変わらない */
         #game-container {
-            width: 100vw;
-            height: 100vh;
-            /* 横長サイズを拡大 (max-width: 1100px) */
-            max-width: 1100px;
-            max-height: 520px;
+            width: 1100px;
+            height: 520px;
+            flex-shrink: 0;
             background: linear-gradient(to bottom, #38bdf8, #bae6fd);
             position: relative;
             overflow: hidden;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transform-origin: center center;
         }
 
         /* スクロールする地面 */
@@ -55,7 +61,7 @@
             height: 440px;
             background-size: contain;
             background-repeat: no-repeat;
-            background-position: center; /* イラストのセンターを配置場所のセンターに合わせる */
+            background-position: center;
             z-index: 5;
             transition: transform 0.1s;
         }
@@ -68,11 +74,11 @@
             background-image: url('Images/CW/hades.png');
             background-size: contain;
             background-repeat: no-repeat;
-            background-position: center; /* イラストのセンターを配置場所のセンターに合わせる */
+            background-position: center;
             z-index: 5;
         }
 
-        /* 時計エリア */
+        /* 時計エリア：常に最前面 */
         #clock-area {
             position: absolute;
             top: 10px;
@@ -261,6 +267,19 @@
 </div>
 
 <script>
+    // ===== 画面サイズに合わせてゲーム全体を拡大縮小 =====
+    // ゲームの内部レイアウトは常に1100x520固定。
+    // 縦向き・横向きどちらでも比率が変わらないよう、
+    // はみ出さない最大サイズにscale()するだけにする。
+    function fitGame() {
+        const container = document.getElementById('game-container');
+        const scale = Math.min(window.innerWidth / 1100, window.innerHeight / 520);
+        container.style.transform = 'scale(' + scale + ')';
+    }
+    window.addEventListener('resize', fitGame);
+    window.addEventListener('orientationchange', fitGame);
+    fitGame();
+
     let currentHour = 3;
     let currentMinute = 0;
     let targetHour = 3;
