@@ -126,6 +126,18 @@
             border: 2px solid #fff;
         }
 
+        /* サウンドON/OFFボタン */
+        #sound-toggle {
+            background: rgba(0,0,0,0.6);
+            border: 2px solid #fff;
+            color: #fff;
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
         /* 操作パネル（下部） */
         #bottom-panel {
             position: absolute;
@@ -227,6 +239,7 @@
     <div id="ui-panel">
         <div class="badge" id="stage-text">ステージ: 1</div>
         <div class="badge" id="score-text">たおしたてき: 0</div>
+        <button id="sound-toggle" onclick="toggleSound()">🔊</button>
     </div>
 
     <div id="message-overlay">ステージクリア！</div>
@@ -268,9 +281,6 @@
 
 <script>
     // ===== 画面サイズに合わせてゲーム全体を拡大縮小 =====
-    // ゲームの内部レイアウトは常に1100x520固定。
-    // 縦向き・横向きどちらでも比率が変わらないよう、
-    // はみ出さない最大サイズにscale()するだけにする。
     function fitGame() {
         const container = document.getElementById('game-container');
         const scale = Math.min(window.innerWidth / 1100, window.innerHeight / 520);
@@ -280,6 +290,54 @@
     window.addEventListener('orientationchange', fitGame);
     fitGame();
 
+    // ===== サウンド関連 =====
+    let soundOn = true;
+    let bgmStarted = false;
+
+    const bgm = new Audio(encodeURI('Sounds/bgm.mp3'));
+    bgm.loop = true;
+    bgm.volume = 0.35;
+
+    const sfx = {
+        select: new Audio(encodeURI('Sounds/セレクト音風な効果音.mp3')),
+        decide: new Audio(encodeURI('Sounds/システム決定音_9.mp3')),
+        correct: new Audio(encodeURI('Sounds/ゲームクリアー！.mp3')),
+        wrong: new Audio(encodeURI('Sounds/爆破・爆発音.mp3'))
+    };
+    for (const key in sfx) {
+        sfx[key].volume = 0.7;
+    }
+
+    function playSfx(name) {
+        if (!soundOn) return;
+        const base = sfx[name];
+        if (!base) return;
+        // 連打しても毎回鳴るように、再生中でも頭から鳴らし直す
+        base.currentTime = 0;
+        base.play().catch(() => {});
+    }
+
+    function startBgmIfNeeded() {
+        if (bgmStarted || !soundOn) return;
+        bgmStarted = true;
+        bgm.play().catch(() => {});
+    }
+
+    function toggleSound() {
+        soundOn = !soundOn;
+        document.getElementById('sound-toggle').innerText = soundOn ? '🔊' : '🔇';
+        if (soundOn) {
+            startBgmIfNeeded();
+            bgm.play().catch(() => {});
+        } else {
+            bgm.pause();
+        }
+    }
+
+    // 最初に画面のどこかをタップした瞬間にBGMを再生開始
+    // （スマホのブラウザは操作前の自動再生を許可しないため）
+    document.addEventListener('click', startBgmIfNeeded, { once: true });
+
     let currentHour = 3;
     let currentMinute = 0;
     let targetHour = 3;
@@ -287,33 +345,6 @@
     let stage = 1;
     let score = 0;
     let isLocked = false;
-
-    function playSound(type) {
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-
-            if (type === 'correct') {
-                osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-                osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
-                osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.4);
-            } else {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(140, ctx.currentTime);
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.3);
-            }
-        } catch(e) {}
-    }
 
     function drawClockHands(hour, minute) {
         const canvas = document.getElementById('handCanvas');
@@ -377,6 +408,7 @@
 
     function changeHour(delta) {
         if (isLocked) return;
+        playSfx('select');
         currentHour += delta;
         if (currentHour > 12) currentHour = 1;
         if (currentHour < 1) currentHour = 12;
@@ -385,16 +417,18 @@
 
     function changeMinute() {
         if (isLocked) return;
+        playSfx('select');
         currentMinute = currentMinute === 0 ? 30 : 0;
         document.getElementById('minute-display').innerText = (currentMinute === 0 ? "00" : "30") + "ふん";
     }
 
     function checkAnswer() {
         if (isLocked) return;
+        playSfx('decide');
 
         if (currentHour === targetHour && currentMinute === targetMinute) {
             isLocked = true;
-            playSound('correct');
+            playSfx('correct');
             score++;
             document.getElementById('score-text').innerText = "たおしたてき: " + score;
 
@@ -428,7 +462,7 @@
             }, 2000);
 
         } else {
-            playSound('wrong');
+            playSfx('wrong');
             const msg = document.getElementById('message-overlay');
             msg.innerText = "ざんねん！\nもういちど チャレンジ！";
             msg.style.display = "block";
