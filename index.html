@@ -317,7 +317,7 @@
     </style>
 </head>
 <body>
-<div id="game-container">
+    <div id="game-container">
     <div id="ui-panel">
         <div class="badge" id="stage-text">ステージ: 1</div>
         <div class="badge" id="score-text">せいかい数: 0/5</div>
@@ -393,8 +393,9 @@
     const sfx = {
         select: new Audio(encodeURI('Sounds/セレクト音風な効果音.mp3')),
         decide: new Audio(encodeURI('Sounds/システム決定音_9.mp3')),
-        correct: new Audio(encodeURI('Sounds/ゲームクリアー！.mp3')),
-        wrong: new Audio(encodeURI('Sounds/爆破・爆発音.mp3'))
+        attack: new Audio(encodeURI('Sounds/打撃音.mp3')),
+        clear: new Audio(encodeURI('Sounds/ゲームクリアー！.mp3')),
+        explosion: new Audio(encodeURI('Sounds/爆破・爆発音.mp3'))
     };
     for (const key in sfx) {
         sfx[key].volume = 0.7;
@@ -408,19 +409,23 @@
         base.play().catch(() => {});
     }
 
-    let correctFadeTimer = null;
-    function playCorrectWithFade() {
+    // クリア音（打撃音 ＋ クリアBGMフェードアウト付き）を同時再生・制御
+    let clearFadeTimer = null;
+    function playClearSequence() {
         if (!soundOn) {
-            sfx.correct.pause();
+            sfx.clear.pause();
             return;
         }
-        const sound = sfx.correct;
+        // 打撃音とクリア音を同時に鳴らす
+        playSfx('attack');
+        
+        const sound = sfx.clear;
         sound.currentTime = 0;
         sound.volume = 0.7;
         sound.play().catch(() => {});
 
-        clearTimeout(correctFadeTimer);
-        correctFadeTimer = setTimeout(() => {
+        clearTimeout(clearFadeTimer);
+        clearFadeTimer = setTimeout(() => {
             let vol = sound.volume;
             const fadeInterval = setInterval(() => {
                 vol -= 0.15;
@@ -450,7 +455,7 @@
             bgm.play().catch(() => {});
         } else {
             bgm.pause();
-            sfx.correct.pause();
+            sfx.clear.pause();
         }
     }
 
@@ -558,13 +563,14 @@
 
         if (currentHour === targetHour && currentMinute === targetMinute) {
             isLocked = true;
-            playCorrectWithFade();
             correctCount++;
             enemyHp = Math.max(0, enemyHp - 1);
             document.getElementById('score-text').innerText = "せいかい数: " + correctCount + "/5";
             updateHpDisplay();
 
             if (enemyHp <= 0) {
+                // 5問正答して敵を倒したとき（打撃音 ＋ クリア音楽）
+                playClearSequence();
                 msg.innerText = "てきを たおした！\nステージクリア！";
                 msg.style.display = "block";
 
@@ -598,6 +604,8 @@
                     isLocked = false;
                 }, 2500);
             } else {
+                // 通常正解時（打撃音のみ）
+                playSfx('attack');
                 msg.innerText = "せいかい！ デメージをあたえた！";
                 msg.style.display = "block";
                 setTimeout(() => {
@@ -608,11 +616,14 @@
             }
 
         } else {
-            playSfx('wrong');
+            // 不正解時（敵の攻撃：打撃音）
+            playSfx('attack');
             playerHp = Math.max(0, playerHp - 1);
             updateHpDisplay();
 
             if (playerHp <= 0) {
+                // 倒されたとき（爆破・爆発音）
+                playSfx('explosion');
                 isLocked = true;
                 msg.innerText = "ゲームオーバー…\nもういちど チャレンジ！";
                 msg.style.display = "block";
