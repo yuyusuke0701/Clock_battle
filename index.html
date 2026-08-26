@@ -29,9 +29,6 @@
             overflow: hidden;
             color: #fff;
         }
-        /* ゲーム画面は常に1100x520の固定レイアウトとして作り、
-           画面サイズに合わせてJSでtransform: scale()するだけにする。
-           → 縦向き・横向きどちらでも配置比率が崩れず、重なり方が変わらない */
         #game-container {
             width: 1100px;
             height: 520px;
@@ -43,7 +40,6 @@
             transform-origin: center center;
         }
 
-        /* スクロールする地面 */
         .scenery {
             position: absolute;
             bottom: 0;
@@ -55,7 +51,6 @@
             background-size: 80px 80px;
         }
 
-        /* シンカリオン＆敵：高さ一定、センター合わせ (height: 440px) */
         #player {
             position: absolute;
             bottom: 40px;
@@ -81,7 +76,6 @@
             z-index: 5;
         }
 
-        /* 時計エリア：常に最前面 */
         #clock-area {
             position: absolute;
             top: 10px;
@@ -110,7 +104,6 @@
             pointer-events: none;
         }
 
-        /* UIパネル（上部情報） */
         #ui-panel {
             position: absolute;
             top: 10px;
@@ -121,6 +114,7 @@
             font-size: 16px;
             font-weight: bold;
             text-shadow: 1px 1px 2px #000;
+            align-items: center;
         }
         .badge {
             background: rgba(0,0,0,0.6);
@@ -128,8 +122,6 @@
             border-radius: 20px;
             border: 2px solid #fff;
         }
-
-        /* サウンドON/OFFボタン */
         #sound-toggle {
             background: rgba(0,0,0,0.6);
             border: 2px solid #fff;
@@ -141,14 +133,52 @@
             cursor: pointer;
         }
 
-        /* ===== 操作パネル（下部）：かっこよくリニューアル ===== */
+        .hp-container {
+            position: absolute;
+            top: 15px;
+            width: 260px;
+            z-index: 20;
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid #38bdf8;
+            border-radius: 12px;
+            padding: 6px 12px;
+            box-shadow: 0 0 10px rgba(56,189,248,0.4);
+        }
+        #player-hp-container { left: 240px; }
+        #enemy-hp-container { right: 240px; }
+
+        .hp-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 3px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .hp-bar-bg {
+            width: 100%;
+            height: 12px;
+            background: #020617;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .hp-bar-fill {
+            height: 100%;
+            width: 100%;
+            transition: width 0.4s ease;
+            border-radius: 4px;
+        }
+        #player-hp-fill { background: linear-gradient(90deg, #22c55e, #4ade80); box-shadow: 0 0 8px #22c55e; }
+        #enemy-hp-fill { background: linear-gradient(90deg, #ef4444, #f87171); box-shadow: 0 0 8px #ef4444; }
+
         #bottom-panel {
             position: absolute;
             bottom: 6px;
             left: 50%;
             transform: translateX(-50%);
             width: 94%;
-            max-width: 660px;
+            max-width: 720px;
             background: linear-gradient(180deg, rgba(20,30,55,0.96), rgba(2,6,23,0.97));
             border: 2px solid #38bdf8;
             border-radius: 18px;
@@ -163,49 +193,43 @@
 
         .time-panel {
             display: flex;
-            align-items: flex-end;
-            gap: 6px;
+            align-items: center;
+            gap: 10px;
             background: rgba(255,255,255,0.05);
-            padding: 8px 12px;
+            padding: 6px 14px;
             border-radius: 14px;
             border: 1px solid rgba(255,255,255,0.15);
         }
 
-        .time-block {
+        .time-control-group {
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-
-        .time-row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .stepper-col {
-            display: flex;
-            flex-direction: column;
             gap: 3px;
         }
 
-        .stepper {
+        .horizontal-stepper {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stepper-btn {
             background: linear-gradient(180deg, #fcd34d, #d97706);
             border: none;
             color: #3f2d00;
-            width: 32px;
-            height: 21px;
-            font-size: 12px;
+            width: 28px;
+            height: 28px;
+            font-size: 13px;
             font-weight: 900;
             border-radius: 6px;
             cursor: pointer;
             box-shadow: 0 2px 0 #92400e, inset 0 1px 1px rgba(255,255,255,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        .stepper.tall {
-            height: 44px;
-            font-size: 15px;
-        }
-        .stepper:active {
+        .stepper-btn:active {
             transform: translateY(2px);
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
         }
@@ -214,11 +238,11 @@
             font-family: 'Orbitron', 'Helvetica Neue', sans-serif;
             background: #020617;
             border-radius: 8px;
-            padding: 4px 8px;
-            font-size: 30px;
+            padding: 2px 8px;
+            font-size: 26px;
             font-weight: 900;
             letter-spacing: 1px;
-            min-width: 64px;
+            min-width: 56px;
             text-align: center;
             box-shadow: inset 0 0 8px rgba(0,0,0,0.8);
         }
@@ -234,9 +258,8 @@
         }
 
         .unit-label {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
-            margin-top: 3px;
             letter-spacing: 1px;
         }
         .unit-hour { color: #60d5ff; }
@@ -244,10 +267,9 @@
 
         .colon {
             font-family: 'Orbitron', sans-serif;
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 900;
             color: #fff;
-            padding-bottom: 6px;
             animation: blink 1s steps(1) infinite;
         }
         @keyframes blink {
@@ -258,12 +280,12 @@
             background: linear-gradient(180deg, #f472b6, #db2777);
             color: white;
             border: none;
-            padding: 14px 22px;
-            font-size: 17px;
+            padding: 12px 20px;
+            font-size: 16px;
             font-weight: 900;
             border-radius: 14px;
             cursor: pointer;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             font-family: 'Orbitron', 'Helvetica Neue', sans-serif;
             white-space: nowrap;
             box-shadow: 0 4px 0 #9d174d, 0 0 14px rgba(244,114,182,0.7);
@@ -278,13 +300,12 @@
             50% { box-shadow: 0 4px 0 #9d174d, 0 0 24px rgba(244,114,182,1); }
         }
 
-        /* メッセージ */
         #message-overlay {
             position: absolute;
             top: 35%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 36px;
+            font-size: 34px;
             font-weight: bold;
             color: #fde047;
             text-shadow: 3px 3px 0 #000, -2px -2px 0 #000;
@@ -296,50 +317,55 @@
     </style>
 </head>
 <body>
-
 <div id="game-container">
     <div id="ui-panel">
         <div class="badge" id="stage-text">ステージ: 1</div>
-        <div class="badge" id="score-text">たおしたてき: 0</div>
+        <div class="badge" id="score-text">せいかい数: 0/5</div>
         <button id="sound-toggle" onclick="toggleSound()">🔊</button>
+    </div>
+
+    <div class="hp-container" id="player-hp-container">
+        <div class="hp-info"><span>PLAYER HP</span><span id="player-hp-text">5 / 5</span></div>
+        <div class="hp-bar-bg"><div class="hp-bar-fill" id="player-hp-fill"></div></div>
+    </div>
+
+    <div class="hp-container" id="enemy-hp-container">
+        <div class="hp-info"><span>ENEMY HP</span><span id="enemy-hp-text">5 / 5</span></div>
+        <div class="hp-bar-bg"><div class="hp-bar-fill" id="enemy-hp-fill"></div></div>
     </div>
 
     <div id="message-overlay">ステージクリア！</div>
 
-    <!-- 大きな時計 -->
     <div id="clock-area">
         <div id="clock-face">
             <canvas id="handCanvas" width="330" height="330" class="hand-canvas"></canvas>
         </div>
     </div>
 
-    <!-- 背景・キャラクター・敵 -->
     <div class="scenery" id="scenery"></div>
     <div id="player" style="background-image: url('Images/CW/e5hayabusa.png');"></div>
     <div id="enemy"></div>
 
-    <!-- 操作パネル -->
     <div id="bottom-panel">
         <div class="time-panel">
-            <div class="time-block">
-                <div class="time-row">
-                    <div class="stepper-col">
-                        <button class="stepper" onclick="changeHour(1)">▲</button>
-                        <button class="stepper" onclick="changeHour(-1)">▼</button>
-                    </div>
+            <div class="time-control-group">
+                <div class="horizontal-stepper">
+                    <button class="stepper-btn" onclick="changeHour(-1)">◀</button>
                     <div class="digital-display hour-color" id="hour-display">03</div>
+                    <button class="stepper-btn" onclick="changeHour(1)">▶</button>
                 </div>
                 <div class="unit-label unit-hour">じ</div>
             </div>
 
             <div class="colon">:</div>
 
-            <div class="time-block">
-                <div class="time-row">
-                    <button class="stepper tall" onclick="changeMinute()">▲▼</button>
+            <div class="time-control-group">
+                <div class="horizontal-stepper">
+                    <button class="stepper-btn" onclick="changeMinute()">◀</button>
                     <div class="digital-display minute-color" id="minute-display">00</div>
+                    <button class="stepper-btn" onclick="changeMinute()">▶</button>
                 </div>
-                <div class="unit-label unit-minute">ふん</div>
+                <div class="unit-label unit-minute">ふん (00/30)</div>
             </div>
         </div>
 
@@ -348,7 +374,6 @@
 </div>
 
 <script>
-    // ===== 画面サイズに合わせてゲーム全体を拡大縮小 =====
     function fitGame() {
         const container = document.getElementById('game-container');
         const scale = Math.min(window.innerWidth / 1100, window.innerHeight / 520);
@@ -358,7 +383,6 @@
     window.addEventListener('orientationchange', fitGame);
     fitGame();
 
-    // ===== サウンド関連 =====
     let soundOn = true;
     let bgmStarted = false;
 
@@ -384,6 +408,34 @@
         base.play().catch(() => {});
     }
 
+    let correctFadeTimer = null;
+    function playCorrectWithFade() {
+        if (!soundOn) {
+            sfx.correct.pause();
+            return;
+        }
+        const sound = sfx.correct;
+        sound.currentTime = 0;
+        sound.volume = 0.7;
+        sound.play().catch(() => {});
+
+        clearTimeout(correctFadeTimer);
+        correctFadeTimer = setTimeout(() => {
+            let vol = sound.volume;
+            const fadeInterval = setInterval(() => {
+                vol -= 0.15;
+                if (vol <= 0) {
+                    vol = 0;
+                    sound.pause();
+                    sound.volume = 0.7;
+                    clearInterval(fadeInterval);
+                } else {
+                    sound.volume = vol;
+                }
+            }, 100);
+        }, 4000);
+    }
+
     function startBgmIfNeeded() {
         if (bgmStarted || !soundOn) return;
         bgmStarted = true;
@@ -398,6 +450,7 @@
             bgm.play().catch(() => {});
         } else {
             bgm.pause();
+            sfx.correct.pause();
         }
     }
 
@@ -408,8 +461,21 @@
     let targetHour = 3;
     let targetMinute = 0;
     let stage = 1;
-    let score = 0;
+    let correctCount = 0;
+    
+    let playerHp = 5;
+    let maxPlayerHp = 5;
+    let enemyHp = 5;
+    let maxEnemyHp = 5;
     let isLocked = false;
+
+    function updateHpDisplay() {
+        document.getElementById('player-hp-text').innerText = playerHp + " / " + maxPlayerHp;
+        document.getElementById('player-hp-fill').style.width = (playerHp / maxPlayerHp * 100) + "%";
+
+        document.getElementById('enemy-hp-text').innerText = enemyHp + " / " + maxEnemyHp;
+        document.getElementById('enemy-hp-fill').style.width = (enemyHp / maxEnemyHp * 100) + "%";
+    }
 
     function drawClockHands(hour, minute) {
         const canvas = document.getElementById('handCanvas');
@@ -420,7 +486,6 @@
 
         ctx.clearRect(0, 0, 330, 330);
 
-        // 時針（青）
         ctx.save();
         ctx.translate(cx, cy);
         const hourAngle = ((hour % 12 + minute / 60) / 12) * 2 * Math.PI - Math.PI / 2;
@@ -439,7 +504,6 @@
         ctx.stroke();
         ctx.restore();
 
-        // 分針（赤）
         ctx.save();
         ctx.translate(cx, cy);
         const minAngle = (minute / 60) * 2 * Math.PI - Math.PI / 2;
@@ -458,7 +522,6 @@
         ctx.stroke();
         ctx.restore();
 
-        // 中心ピン
         ctx.beginPath();
         ctx.arc(cx, cy, 5 * scale, 0, 2 * Math.PI);
         ctx.fillStyle = '#000';
@@ -491,52 +554,89 @@
         if (isLocked) return;
         playSfx('decide');
 
+        const msg = document.getElementById('message-overlay');
+
         if (currentHour === targetHour && currentMinute === targetMinute) {
             isLocked = true;
-            playSfx('correct');
-            score++;
-            document.getElementById('score-text').innerText = "たおしたてき: " + score;
+            playCorrectWithFade();
+            correctCount++;
+            enemyHp = Math.max(0, enemyHp - 1);
+            document.getElementById('score-text').innerText = "せいかい数: " + correctCount + "/5";
+            updateHpDisplay();
 
-            const msg = document.getElementById('message-overlay');
-            msg.innerText = "てきを たおした！\nステージクリア！";
-            msg.style.display = "block";
+            if (enemyHp <= 0) {
+                msg.innerText = "てきを たおした！\nステージクリア！";
+                msg.style.display = "block";
 
-            const enemy = document.getElementById('enemy');
-            const player = document.getElementById('player');
-            const scenery = document.getElementById('scenery');
+                const enemy = document.getElementById('enemy');
+                const player = document.getElementById('player');
+                const scenery = document.getElementById('scenery');
 
-            let pos = 0;
-            const anim = setInterval(() => {
-                pos += 6;
-                scenery.style.backgroundPositionX = (-pos) + "px";
-                player.style.transform = "translateY(" + (pos % 12 > 6 ? -5 : 0) + "px)";
-                if (pos > 160) {
-                    clearInterval(anim);
-                    enemy.style.display = "none";
-                }
-            }, 30);
+                let pos = 0;
+                const anim = setInterval(() => {
+                    pos += 6;
+                    scenery.style.backgroundPositionX = (-pos) + "px";
+                    player.style.transform = "translateY(" + (pos % 12 > 6 ? -5 : 0) + "px)";
+                    if (pos > 160) {
+                        clearInterval(anim);
+                        enemy.style.display = "none";
+                    }
+                }, 30);
 
-            setTimeout(() => {
-                msg.style.display = "none";
-                stage++;
-                document.getElementById('stage-text').innerText = "ステージ: " + stage;
-                player.style.transform = "none";
-                enemy.style.display = "block";
-                generateQuestion();
-                isLocked = false;
-            }, 2000);
+                setTimeout(() => {
+                    msg.style.display = "none";
+                    stage++;
+                    correctCount = 0;
+                    enemyHp = 5;
+                    playerHp = 5;
+                    document.getElementById('stage-text').innerText = "ステージ: " + stage;
+                    document.getElementById('score-text').innerText = "せいかい数: 0/5";
+                    player.style.transform = "none";
+                    enemy.style.display = "block";
+                    updateHpDisplay();
+                    generateQuestion();
+                    isLocked = false;
+                }, 2500);
+            } else {
+                msg.innerText = "せいかい！ デメージをあたえた！";
+                msg.style.display = "block";
+                setTimeout(() => {
+                    msg.style.display = "none";
+                    generateQuestion();
+                    isLocked = false;
+                }, 1200);
+            }
 
         } else {
             playSfx('wrong');
-            const msg = document.getElementById('message-overlay');
-            msg.innerText = "ざんねん！\nもういちど チャレンジ！";
-            msg.style.display = "block";
-            setTimeout(() => {
-                msg.style.display = "none";
-            }, 1200);
+            playerHp = Math.max(0, playerHp - 1);
+            updateHpDisplay();
+
+            if (playerHp <= 0) {
+                isLocked = true;
+                msg.innerText = "ゲームオーバー…\nもういちど チャレンジ！";
+                msg.style.display = "block";
+                setTimeout(() => {
+                    msg.style.display = "none";
+                    playerHp = 5;
+                    enemyHp = 5;
+                    correctCount = 0;
+                    document.getElementById('score-text').innerText = "せいかい数: 0/5";
+                    updateHpDisplay();
+                    generateQuestion();
+                    isLocked = false;
+                }, 2000);
+            } else {
+                msg.innerText = "ざんねん！\nダメージを うけた！";
+                msg.style.display = "block";
+                setTimeout(() => {
+                    msg.style.display = "none";
+                }, 1200);
+            }
         }
     }
 
+    updateHpDisplay();
     generateQuestion();
 </script>
 
