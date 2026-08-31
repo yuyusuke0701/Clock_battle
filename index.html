@@ -348,7 +348,6 @@
             white-space: pre-line;
         }
     </style>
-</head>
 <body>
 
 <div id="game-container">
@@ -436,9 +435,10 @@
         select: new Audio(encodeURI('Sounds/セレクト音風な効果音.mp3')),
         decide: new Audio(encodeURI('Sounds/システム決定音_9.mp3')),
         correct: new Audio(encodeURI('Sounds/ゲームクリアー！.mp3')),
-        wrong: new Audio(encodeURI('Sounds/爆破・爆発音.mp3'))
+        wrong: new Audio(encodeURI('Sounds/爆破・爆発音.mp3')),
+        hit: new Audio(encodeURI('Sounds/打撃音.mp3'))
     };
-    const sfxDefaultVolume = { select: 0.7, decide: 0.7, correct: 0.7, wrong: 0.7 };
+    const sfxDefaultVolume = { select: 0.7, decide: 0.7, correct: 0.7, wrong: 0.7, hit: 0.7 };
     for (const key in sfx) {
         sfx[key].volume = sfxDefaultVolume[key];
     }
@@ -638,6 +638,7 @@
         enemyHP = Math.max(0, enemyHP - 1);
         renderHP();
         flashHit('enemy');
+        playSfx('hit');
 
         if (enemyHP > 0) {
             // まだ倒しきっていない：次の問題へ
@@ -715,4 +716,6 @@
 
 </body>
 </html>
-    /html>
+
+
+</head>
