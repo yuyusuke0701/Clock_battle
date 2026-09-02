@@ -316,10 +316,6 @@
             background-position: center;
             background-repeat: no-repeat;
         }
-        /* 緑の陸地（scenery）は削除するため、非表示（display: none）に変更 */
-        .scenery {
-            display: none;
-        }
         #player {
             position: absolute;
             bottom: 40px;
@@ -338,11 +334,11 @@
             right: 60px;
             width: 320px;
             height: 440px;
+            background-image: url('Images/CW/hades.png');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             z-index: 5;
-            transition: transform 0.1s;
         }
         .hit-flash {
             filter: brightness(2.2) drop-shadow(0 0 14px #fff);
@@ -521,10 +517,8 @@
             transform: translateY(3px);
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
         }
-        
-        /* 子どもが読みやすいよう、Orbitronから通常の太字ゴシック等に変更しつつサイズを調整 */
         .digital-display {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Fredoka', 'Helvetica Neue', sans-serif;
             background: #020617;
             border-radius: 8px;
             padding: 4px 6px;
@@ -554,7 +548,7 @@
         .unit-hour { color: #60d5ff; }
         .unit-minute { color: #ff8a8a; }
         .colon {
-            font-family: 'Orbitron', sans-serif;
+            font-family: 'Fredoka', sans-serif;
             font-size: 26px;
             font-weight: 900;
             color: #fff;

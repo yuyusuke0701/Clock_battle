@@ -124,6 +124,14 @@
         { id: 'e7kagayaki', name: 'E7 かがやき', img: 'Images/CW/e7kagayaki.png' }
     ];
 
+    // ボス以外の敵はこの中からランダムに使用
+    const NORMAL_ENEMY_IMAGES = [
+        'Images/CW/敵1.png',
+        'Images/CW/敵2.png',
+        'Images/CW/敵3.png',
+        'Images/CW/敵4.png'
+    ];
+
     const SAVE_KEY = 'shinkalion_clock_master_save_v1';
 
     function loadProgress() {
@@ -134,7 +142,8 @@
         return {
             unlockedStage: 1,
             stageProgress: {},
-            selectedCharacter: 'e5hayabusa'
+            selectedCharacter: 'e5hayabusa',
+            visitedStages: {}
         };
     }
     function saveProgress() {
@@ -148,6 +157,7 @@
     }
 
     let progress = loadProgress();
+    if (!progress.visitedStages) progress.visitedStages = {};
     let currentScreen = 'top';
     let currentStageId = progress.unlockedStage;
     let pendingNodeIndex = null;
@@ -168,7 +178,19 @@
         showScreen('map');
         playBgm('map');
         renderMap();
+        // STARTから飛んだときは常に演出を表示
         playStageIntro(currentStageId);
+        progress.visitedStages[currentStageId] = true;
+        saveProgress();
+    }
+
+    // 初めて訪れるステージのときだけ演出を表示
+    function maybeShowStageIntro() {
+        if (!progress.visitedStages[currentStageId]) {
+            playStageIntro(currentStageId);
+            progress.visitedStages[currentStageId] = true;
+            saveProgress();
+        }
     }
 
     /* ===================================================================
@@ -227,14 +249,14 @@
         playSfx('select');
         currentStageId--;
         renderMap();
-        playStageIntro(currentStageId);
+        maybeShowStageIntro();
     }
     function nextStage() {
         if (currentStageId >= progress.unlockedStage) return;
         playSfx('select');
         currentStageId++;
         renderMap();
-        playStageIntro(currentStageId);
+        maybeShowStageIntro();
     }
 
     function selectNode(i) {
@@ -425,11 +447,12 @@
         document.getElementById('hour-display').innerText = String(currentHour).padStart(2, '0');
     }
 
-    function setMinute(val) {
+    function changeMinute() {
         if (isLocked) return;
         playSfx('select');
-        currentMinute = val;
-        document.getElementById('minute-display').innerText = String(val).padStart(2, '0');
+        // 00と30の2値だけなので、押すたびに切り替えることで無限にループする
+        currentMinute = currentMinute === 0 ? 30 : 0;
+        document.getElementById('minute-display').innerText = String(currentMinute).padStart(2, '0');
     }
 
     function checkAnswer() {
@@ -447,12 +470,27 @@
         showScreen('battle');
         playBgm('battle');
 
+        const playerEl = document.getElementById('player');
+        const enemyEl = document.getElementById('enemy');
+
+        // 前回のバトルの揺れ・光り演出のクラスが残っていることがあるため、
+        // バトル開始時に必ずリセットする（開始直後に味方が揺れて見えるバグの対策）
+        playerEl.classList.remove('shake', 'hit-flash');
+        enemyEl.classList.remove('shake', 'hit-flash');
+        playerEl.style.transform = 'none';
+
         const charDef = CHARACTERS.find(c => c.id === progress.selectedCharacter) || CHARACTERS[0];
-        document.getElementById('player').style.backgroundImage = "url('" + charDef.img + "')";
-        document.getElementById('player').style.transform = 'none';
-        document.getElementById('enemy').style.display = 'block';
+        playerEl.style.backgroundImage = "url('" + charDef.img + "')";
 
         const isBoss = nodeIndex === 5;
+        if (isBoss) {
+            enemyEl.style.backgroundImage = "url('Images/CW/hades.png')";
+        } else {
+            const randomEnemy = NORMAL_ENEMY_IMAGES[Math.floor(Math.random() * NORMAL_ENEMY_IMAGES.length)];
+            enemyEl.style.backgroundImage = "url('" + randomEnemy + "')";
+        }
+        enemyEl.style.display = 'block';
+
         enemyMaxHp = isBoss ? ENEMY_MAX_HP + 3 : ENEMY_MAX_HP;
         playerHP = PLAYER_MAX_HP;
         enemyHP = enemyMaxHp;
@@ -486,6 +524,7 @@
         enemyHP = Math.max(0, enemyHP - 1);
         renderHP();
         flashHit('enemy');
+        shakeElement('enemy');
         playSfx('hit');
 
         if (enemyHP > 0) {
@@ -507,18 +546,18 @@
 
         const enemy = document.getElementById('enemy');
         const player = document.getElementById('player');
-        const scenery = document.getElementById('scenery');
 
-        let pos = 0;
-        const anim = setInterval(() => {
-            pos += 6;
-            scenery.style.backgroundPositionX = (-pos) + "px";
-            player.style.transform = "translateY(" + (pos % 12 > 6 ? -5 : 0) + "px)";
-            if (pos > 160) {
-                clearInterval(anim);
+        // 勝利モーション（軽くジャンプ）
+        let hops = 0;
+        const hopAnim = setInterval(() => {
+            hops++;
+            player.style.transform = "translateY(" + (hops % 2 === 1 ? -14 : 0) + "px)";
+            if (hops >= 6) {
+                clearInterval(hopAnim);
+                player.style.transform = "none";
                 enemy.style.display = "none";
             }
-        }, 30);
+        }, 130);
 
         setTimeout(() => {
             player.style.transform = "none";
