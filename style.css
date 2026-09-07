@@ -1,24 +1,46 @@
-/* 例：スマホ横向き時の下部パネルやボタンのサイズ調整 */
+/* --- スマホ横向き時の下部パネル・ボタン調整 --- */
 @media screen and (orientation: landscape) {
     #bottom-panel {
-        bottom: 12px; /* 画面最下部から少し浮かせる */
+        position: absolute;
+        bottom: 25px !important; /* 画面下部からしっかりと浮かせます */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 600px;
+        background: rgba(0, 0, 0, 0.75); /* 必要に応じて背景色 */
+        padding: 10px 15px 15px 15px !important;
+        border-radius: 15px;
+        z-index: 100;
+    }
+
+    /* タイムパネル全体を整える */
+    .time-panel {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 8px;
     }
 
     /* 増減ボタン（▲▼）を大きくして押しやすくする */
     .step-btn {
-        font-size: 1.6rem;
-        padding: 10px 16px;
+        font-size: 1.8rem !important;
+        padding: 8px 16px !important;
+        min-width: 50px;
+        min-height: 50px;
     }
 
     /* デジタル数字も大きく見やすく */
     .digital-display {
-        font-size: 2.2rem;
-        min-width: 60px;
+        font-size: 2.4rem !important;
+        min-width: 70px;
     }
 
     /* 決定ボタンを大きく */
     #decide-btn {
-        font-size: 1.3rem;
-        padding: 12px 24px;
+        font-size: 1.4rem !important;
+        padding: 10px 20px !important;
+        width: 100%;
+        cursor: pointer;
     }
 }
