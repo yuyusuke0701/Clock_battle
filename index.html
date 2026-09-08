@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>シンカリオン とけいマスター！</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+
+<div id="game-container">
+    <button id="sound-toggle" onclick="toggleSound()">🔊</button>
+
+    <!-- ① TOP画面 -->
+    <div id="screen-top" class="screen">
+        <button id="start-btn" onclick="startGame()">START</button>
+    </div>
+
+    <!-- ② マップ画面 -->
+    <div id="screen-map" class="screen" style="display:none;">
+        <div id="stage-nav">
+            <button class="nav-arrow" id="prev-arrow" onclick="prevStage()">◀</button>
+            <div id="stage-nav-label">ステージ 1</div>
+            <button class="nav-arrow" id="next-arrow" onclick="nextStage()">▶</button>
+        </div>
+        <button id="menu-btn" onclick="openMenu()">☰ メニュー</button>
+        <div id="map-nodes"></div>
+        <div id="map-toast"></div>
+        <div id="stage-intro"><div id="stage-intro-text">ステージ 1</div></div>
+    </div>
+
+    <!-- ノード確認ポップアップ -->
+    <div id="node-popup">
+        <div class="popup-box">
+            <h2 id="node-popup-title">バトルポイント 1</h2>
+            <button class="btn-primary" onclick="confirmBattleStart()">⚔ バトルスタート</button>
+            <button class="btn-secondary" onclick="closeNodePopup()">とじる</button>
+        </div>
+    </div>
+
+    <!-- メニュー -->
+    <div id="menu-overlay">
+        <div class="popup-box">
+            <h2>メニュー</h2>
+            <button class="btn-primary" onclick="openShireishitsu()">しれいしつ</button>
+            <button class="btn-secondary" onclick="closeMenu()">とじる</button>
+        </div>
+    </div>
+
+    <!-- しれいしつ（シンカリオン選択） -->
+    <div id="shireishitsu-overlay">
+        <div class="popup-box">
+            <h2>しれいしつ：シンカリオンをえらぶ</h2>
+            <div id="character-list"></div>
+            <button class="btn-secondary" onclick="closeShireishitsu()">もどる</button>
+        </div>
+    </div>
+
+    <!-- ③ バトル画面 -->
+    <div id="screen-battle" class="screen" style="display:none;">
+        <div id="ui-panel-left">
+            <div class="badge-row">
+                <div class="badge" id="stage-text">ステージ 1-1</div>
+                <div class="badge" id="score-text">たおしたてき: 0</div>
+                <button id="back-to-map-btn" onclick="backToMap()">🏠マップへ</button>
+            </div>
+            <div class="hp-container">
+                <span class="hp-label">HP</span>
+                <div class="hp-bar" id="player-hp"></div>
+            </div>
+        </div>
+
+        <div id="ui-panel-right">
+            <div class="hp-container">
+                <div class="hp-bar" id="enemy-hp"></div>
+                <span class="hp-label">HP</span>
+            </div>
+        </div>
+
+        <div id="message-overlay">ステージクリア！</div>
+
+        <div id="clock-area">
+            <div id="clock-face">
+                <canvas id="handCanvas" width="330" height="330" class="hand-canvas"></canvas>
+            </div>
+        </div>
+
+        <div id="player"></div>
+        <div id="enemy"></div>
+
+        <div id="bottom-panel">
+            <div class="time-panel">
+                <div class="time-block">
+                    <div class="stepper-row">
+                        <button class="step-btn" onclick="changeHour(-1)">▼</button>
+                        <div class="digital-display hour-color" id="hour-display">03</div>
+                        <button class="step-btn" onclick="changeHour(1)">▲</button>
+                    </div>
+                    <div class="unit-label unit-hour">じ</div>
+                </div>
+
+                <div class="colon">:</div>
+
+                <div class="time-block">
+                    <div class="stepper-row">
+                        <button class="step-btn" onclick="changeMinute()">▼</button>
+                        <div class="digital-display minute-color" id="minute-display">00</div>
+                        <button class="step-btn" onclick="changeMinute()">▲</button>
+                    </div>
+                    <div class="unit-label unit-minute">ふん</div>
+                </div>
+            </div>
+
+            <button id="decide-btn" onclick="checkAnswer()">⚡ こうげきする ⚡</button>
+        </div>
+    </div>
+</div>
+
+<script src="game.js?v=3"></script>
+
+</body>
+</html>
