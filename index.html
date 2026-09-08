@@ -3,150 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>しんかんせん クロックマスター</title>
-    <link rel="stylesheet" href="style.css">
+    <title>シンカリオン とけいマスター！</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
-    <!-- ゲーム全体を包むコンテナ（固定サイズを等倍拡大縮小） -->
-    <div id="game-container">
+<div id="game-container">
+    <button id="sound-toggle" onclick="toggleSound()">🔊</button>
 
-        <!-- トップ画面 -->
-        <div id="screen-top" class="screen" style="display: flex;">
-            <div class="top-title">しんかんせん<br>クロックマスター</div>
-            <button class="big-btn" onclick="startGame()">ゲームスタート</button>
+    <!-- ① TOP画面 -->
+    <div id="screen-top" class="screen">
+        <button id="start-btn" onclick="startGame()">START</button>
+    </div>
+
+    <!-- ② マップ画面 -->
+    <div id="screen-map" class="screen" style="display:none;">
+        <div id="stage-nav">
+            <button class="nav-arrow" id="prev-arrow" onclick="prevStage()">◀</button>
+            <div id="stage-nav-label">ステージ 1</div>
+            <button class="nav-arrow" id="next-arrow" onclick="nextStage()">▶</button>
+        </div>
+        <button id="menu-btn" onclick="openMenu()">☰ メニュー</button>
+        <div id="map-nodes"></div>
+        <div id="map-toast"></div>
+        <div id="stage-intro"><div id="stage-intro-text">ステージ 1</div></div>
+    </div>
+
+    <!-- ノード確認ポップアップ -->
+    <div id="node-popup">
+        <div class="popup-box">
+            <h2 id="node-popup-title">バトルポイント 1</h2>
+            <button class="btn-primary" onclick="confirmBattleStart()">⚔ バトルスタート</button>
+            <button class="btn-secondary" onclick="closeNodePopup()">とじる</button>
+        </div>
+    </div>
+
+    <!-- メニュー -->
+    <div id="menu-overlay">
+        <div class="popup-box">
+            <h2>メニュー</h2>
+            <button class="btn-primary" onclick="openShireishitsu()">しれいしつ</button>
+            <button class="btn-secondary" onclick="closeMenu()">とじる</button>
+        </div>
+    </div>
+
+    <!-- しれいしつ（シンカリオン選択） -->
+    <div id="shireishitsu-overlay">
+        <div class="popup-box">
+            <h2>しれいしつ：シンカリオンをえらぶ</h2>
+            <div id="character-list"></div>
+            <button class="btn-secondary" onclick="closeShireishitsu()">もどる</button>
+        </div>
+    </div>
+
+    <!-- ③ バトル画面 -->
+    <div id="screen-battle" class="screen" style="display:none;">
+        <div id="ui-panel-left">
+            <div class="badge-row">
+                <div class="badge" id="stage-text">ステージ 1-1</div>
+                <div class="badge" id="score-text">たおしたてき: 0</div>
+                <button id="back-to-map-btn" onclick="backToMap()">🏠マップへ</button>
+            </div>
+            <div class="hp-container">
+                <span class="hp-label">HP</span>
+                <div class="hp-bar" id="player-hp"></div>
+            </div>
         </div>
 
-        <!-- マップ画面 -->
-        <div id="screen-map" class="screen" style="display: none;">
-            <div id="stage-nav-header">
-                <button id="prev-arrow" onclick="prevStage()">◀</button>
-                <span id="stage-nav-label">ステージ 1</span>
-                <button id="next-arrow" onclick="nextStage()">▶</button>
+        <div id="ui-panel-right">
+            <div class="hp-container">
+                <div class="hp-bar" id="enemy-hp"></div>
+                <span class="hp-label">HP</span>
             </div>
-            
-            <div id="map-nodes">
-                <!-- JavaScriptでノードが動的生成されます -->
-            </div>
-
-            <div id="stage-intro" class="stage-intro">
-                <div id="stage-intro-text">ステージ 1</div>
-            </div>
-
-            <div id="map-toast" class="map-toast" style="display: none;"></div>
         </div>
 
-        <!-- バトル画面 -->
-        <div id="screen-battle" class="screen" style="display: none;">
-            <div class="battle-header">
-                <div id="stage-text">ステージ1-1</div>
-                <div class="hp-container">
-                    <span class="hp-label">味方:</span>
-                    <div id="player-hp" class="hp-bars"></div>
-                </div>
-                <div class="hp-container">
-                    <span class="hp-label">敵:</span>
-                    <div id="enemy-hp" class="hp-bars"></div>
-                </div>
-            </div>
+        <div id="message-overlay">ステージクリア！</div>
 
-            <!-- 【追加】10秒クリティカルタイマーのバー -->
+        <div id="clock-area">
+            <div id="clock-face">
+                <canvas id="handCanvas" width="330" height="330" class="hand-canvas"></canvas>
+            </div>
+        </div>
+
+        <div id="player"></div>
+        <div id="enemy"></div>
+
+        <!-- クリティカルヒット時のカットイン演出 -->
+        <div id="critical-cutin">
+            <div class="cutin-text">クリティカルヒット！</div>
+        </div>
+
+        <div id="bottom-panel">
+            <!-- 10秒クリティカルタイマーバー -->
             <div id="critical-timer-container">
                 <div id="critical-timer-bar"></div>
             </div>
 
-            <div class="battle-arena">
-                <div id="player" class="battle-chara"></div>
-                <div id="vs-label">VS</div>
-                <div id="enemy" class="battle-chara"></div>
-            </div>
+            <div class="time-panel">
+                <div class="time-block">
+                    <div class="stepper-row">
+                        <button class="step-btn" onclick="changeHour(-1)">▼</button>
+                        <div class="digital-display hour-color" id="hour-display">03</div>
+                        <button class="step-btn" onclick="changeHour(1)">▲</button>
+                    </div>
+                    <div class="unit-label unit-hour">じ</div>
+                </div>
 
-            <!-- 時計エリア -->
-            <div class="clock-area">
-                <div class="clock-frame">
-                    <canvas id="handCanvas" width="330" height="330"></canvas>
+                <div class="colon">:</div>
+
+                <div class="time-block">
+                    <div class="stepper-row">
+                        <button class="step-btn" onclick="changeMinute()">▼</button>
+                        <div class="digital-display minute-color" id="minute-display">00</div>
+                        <button class="step-btn" onclick="changeMinute()">▲</button>
+                    </div>
+                    <div class="unit-label unit-minute">ふん</div>
                 </div>
             </div>
 
-            <!-- 操作・解答エリア -->
-            <div class="control-area">
-                <div class="time-adjusters">
-                    <div class="adjuster-group">
-                        <span class="adjuster-title">じかん (1-12)</span>
-                        <div class="adjuster-buttons">
-                            <button onclick="changeHour(-1)">-</button>
-                            <span id="hour-display" class="time-text">03</span>
-                            <button onclick="changeHour(1)">+</button>
-                        </div>
-                    </div>
-                    <div class="adjuster-group">
-                        <span class="adjuster-title">ふん (00/30)</span>
-                        <div class="adjuster-buttons" style="width: 100%;">
-                            <button onclick="changeMinute()" style="width: 100%;" id="minute-display">00</button>
-                        </div>
-                    </div>
-                </div>
-                <button class="decide-btn" onclick="checkAnswer()">けってい！</button>
-            </div>
-
-            <button class="back-map-btn" onclick="backToMap()">マップへもどる</button>
-        </div>
-
-    </div>
-
-    <!-- メニューボタン（常時表示用など） -->
-    <button id="menu-btn" onclick="openMenu()" style="display: none;">⚙️</button>
-
-    <!-- メニューオーバーレイ -->
-    <div id="menu-overlay" class="overlay" style="display: none;">
-        <div class="overlay-content">
-            <h2>メニュー</h2>
-            <button class="menu-action-btn" onclick="openShireishitsu()">しれいしつ（キャラクター変更）</button>
-            <button class="menu-action-btn" onclick="closeMenu()">とじる</button>
+            <button id="decide-btn" onclick="checkAnswer()">⚡ こうげきする ⚡</button>
         </div>
     </div>
+</div>
 
-    <!-- しれいしつオーバーレイ -->
-    <div id="shireishitsu-overlay" class="overlay" style="display: none;">
-        <div class="overlay-content">
-            <h2>しれいしつ</h2>
-            <p>しゅっつうする しんかんせんを えらんでね</p>
-            <div id="character-list" class="character-list">
-                <!-- キャラクターカードが動的生成されます -->
-            </div>
-            <button class="menu-action-btn" onclick="closeShireishitsu()">もどる</button>
-        </div>
-    </div>
+<script src="game.js?v=4"></script>
 
-    <!-- ノード確認ポップアップ -->
-    <div id="node-popup" class="overlay" style="display: none;">
-        <div class="overlay-content">
-            <h2 id="node-popup-title">バトルポイント 1</h2>
-            <p>このバトルに チャレンジしますか？</p>
-            <div class="popup-btns">
-                <button class="menu-action-btn" onclick="confirmBattleStart()">しゅっつう！</button>
-                <button class="menu-action-btn" onclick="closeNodePopup()">やめる</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- メッセージオーバーレイ -->
-    <div id="message-overlay" class="message-overlay"></div>
-
-    <!-- サウンド切替ボタン -->
-    <button id="sound-toggle" onclick="toggleSound()">🔊</button>
-
-    <!-- 【追加・修正】クリティカル発動時のカットイン演出用レイヤー（上半身50%トリミング対応） -->
-    <div id="critical-cutin">
-        <div class="cutin-content">
-            <div class="cutin-img-wrapper">
-                <img id="cutin-chara-img" src="" alt="Critical Chara">
-            </div>
-            <div class="cutin-text">CRITICAL!</div>
-        </div>
-    </div>
-
-    <!-- ゲームロジックの読み込み -->
-    <script src="game.js"></script>
 </body>
 </html>
