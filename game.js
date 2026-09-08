@@ -1,5 +1,5 @@
 /* ===================================================================
-       画面サイズ対応：常に1100x520の固定レイアウトを拡大縮小するだけにする
+       画面サイズ対応：常に固定レイアウトを拡大縮小するだけにする
     =================================================================== */
     function fitGame() {
         const container = document.getElementById('game-container');
@@ -29,7 +29,7 @@
         correct: new Audio(encodeURI('Sounds/ゲームクリアー！.mp3')),
         wrong: new Audio(encodeURI('Sounds/爆破・爆発音.mp3')),
         hit: new Audio(encodeURI('Sounds/打撃音.mp3')),
-        critical: new Audio(encodeURI('Sounds/レーザー攻撃.mp3')) // 追加：クリティカル効果音
+        critical: new Audio(encodeURI('Sounds/レーザー攻撃.mp3'))
     };
     const sfxDefaultVolume = { select: 0.7, decide: 0.7, correct: 0.7, wrong: 0.7, hit: 0.7, critical: 0.8 };
     for (const key in sfx) {
@@ -51,7 +51,6 @@
         base.volume = sfxDefaultVolume[name] ?? 0.7;
         base.play().catch(() => {});
 
-        // 再生開始4秒後からフェードアウトし、5秒でぴったり停止
         const fadeStartMs = 4000;
         const fadeDurationMs = 1000;
         const fadeSteps = 20;
@@ -109,7 +108,6 @@
         { id: 6, bg: 'Images/stage/map06_アジト.png' }
     ];
 
-    // バトルポイントの座標（%指定）
     const NODE_POSITIONS = [
         { x: 18, y: 72 },
         { x: 32, y: 42 },
@@ -340,7 +338,6 @@
     let enemyHP = ENEMY_MAX_HP;
     let enemyMaxHp = ENEMY_MAX_HP;
 
-    // クリティカルタイマー関連の変数
     let criticalTimer = null;
     let timeLeft = 10;
     const MAX_TIME = 10;
@@ -480,7 +477,7 @@
         targetHour = Math.floor(Math.random() * 12) + 1;
         targetMinute = Math.random() < 0.5 ? 0 : 30;
         drawClockHands(targetHour, targetMinute);
-        startCriticalTimer(); // 問題出題時に10秒タイマーをリセット＆スタート
+        startCriticalTimer();
     }
 
     function changeHour(delta) {
@@ -565,38 +562,39 @@
     function handleCorrect() {
         clearInterval(criticalTimer);
 
-        // 10秒以内に解けていればクリティカル (2ダメージ)、切れていれば通常 (1ダメージ)
         const isCritical = timeLeft > 0;
         const damage = isCritical ? 2 : 1;
 
         if (isCritical) {
-            // クリティカル演出（カットイン表示 ＆ レーザー攻撃.mp3再生）
             showCriticalCutin(() => {
                 executeAttackAfterCutin(damage);
             });
         } else {
-            // 通常攻撃
             executeAttackAfterCutin(damage);
         }
     }
 
     function showCriticalCutin(callback) {
         const cutin = document.getElementById('critical-cutin');
-        if (cutin) {
+        const imgEl = document.getElementById('cutin-chara-img');
+        
+        if (cutin && imgEl) {
+            const charDef = CHARACTERS.find(c => c.id === progress.selectedCharacter) || CHARACTERS[0];
+            imgEl.src = charDef.img;
+
             cutin.classList.add('show');
-            playSfx('critical'); // レーザー攻撃.mp3を再生
+            playSfx('critical');
 
             setTimeout(() => {
                 cutin.classList.remove('show');
                 if (callback) callback();
-            }, 750); // 0.75秒後にカットインを消して攻撃モーションへ
+            }, 1000); // 1秒表示
         } else {
             if (callback) callback();
         }
     }
 
     function executeAttackAfterCutin(damage) {
-        // シンカリオン（左）が右へ攻撃モーション
         attackLunge('player', 40);
 
         setTimeout(() => {
@@ -606,7 +604,7 @@
             shakeElement('enemy');
 
             const isFinishingBlow = enemyHP <= 0;
-            playSfx(isFinishingBlow ? 'wrong' : 'hit'); // とどめは爆発音、通常は打撃音
+            playSfx(isFinishingBlow ? 'wrong' : 'hit');
 
             if (!isFinishingBlow) {
                 const dmgText = damage === 2 ? "クリティカル！ てきに 2のダメージ！" : "てきは 1のダメージ！";
@@ -619,7 +617,6 @@
                 return;
             }
 
-            // ===== 敵を倒した！ =====
             isLocked = true;
             playSfx('correct');
             score++;
@@ -655,7 +652,6 @@
     function handleWrong() {
         clearInterval(criticalTimer);
 
-        // 敵（右）が左へ攻撃モーション
         attackLunge('enemy', -40);
 
         setTimeout(() => {
@@ -671,13 +667,12 @@
                 showMessage("みかたは 1のダメージ！", 900);
                 isLocked = true;
                 setTimeout(() => { 
-                    generateQuestion(); // 不正解時は次の問題（タイマー再始動）へ
+                    generateQuestion();
                     isLocked = false; 
                 }, 900);
                 return;
             }
 
-            // ===== ゲームオーバー =====
             isLocked = true;
             showMessage("ゲームオーバー！", 1800);
             setTimeout(() => {
