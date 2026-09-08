@@ -319,7 +319,7 @@
         }
         #player {
             position: absolute;
-            top: 5px;
+            top: -50px;
             left: 6px;
             width: 220px;
             height: 640px;
@@ -331,9 +331,9 @@
         }
         #enemy {
             position: absolute;
-            top: 5px;
+            top: -50px;
             right: 6px;
-            width: 220px;
+            width: 300px;
             height: 640px;
             background-image: url('Images/CW/hades.png');
             background-size: contain;
