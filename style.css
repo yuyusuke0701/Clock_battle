@@ -319,10 +319,10 @@
         }
         #player {
             position: absolute;
-            top: 0px;
-            left: 6px;
-            width: 400px;
-            height: 800px;
+            top: 325px;
+            left: 15px;
+            width: 210px;
+            height: 240px;
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center bottom;
@@ -331,10 +331,10 @@
         }
         #enemy {
             position: absolute;
-            top: 0px;
-            right: 6px;
-            width: 220px;
-            height: 640px;
+            top: 325px;
+            right: 15px;
+            width: 210px;
+            height: 240px;
             background-image: url('Images/CW/hades.png');
             background-size: contain;
             background-repeat: no-repeat;
@@ -357,11 +357,11 @@
 
         #clock-area {
             position: absolute;
-            top: 72px;
+            top: 55px;
             left: 50%;
             transform: translateX(-50%);
-            width: 280px;
-            height: 280px;
+            width: 260px;
+            height: 260px;
             z-index: 10;
         }
         #clock-face {
@@ -467,21 +467,21 @@
 
         #bottom-panel {
             position: absolute;
-            bottom: 14px;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
-            width: 92%;
-            max-width: 420px;
+            width: 94%;
+            max-width: 450px;
             background: linear-gradient(180deg, rgba(20,30,55,0.96), rgba(2,6,23,0.97));
             border: 2px solid #38bdf8;
             border-radius: 18px;
-            padding: 14px 16px;
+            padding: 12px 14px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 20;
-            gap: 12px;
+            gap: 10px;
             box-shadow: 0 0 22px rgba(56,189,248,0.45), 0 4px 15px rgba(0,0,0,0.5);
         }
         .time-panel {
