@@ -1,4 +1,4 @@
-    /* ===================================================================
+/* ===================================================================
        画面サイズ対応：常に1100x520の固定レイアウトを拡大縮小するだけにする
     =================================================================== */
     function fitGame() {
@@ -28,11 +28,12 @@
         decide: new Audio(encodeURI('Sounds/システム決定音_9.mp3')),
         correct: new Audio(encodeURI('Sounds/ゲームクリアー！.mp3')),
         wrong: new Audio(encodeURI('Sounds/爆破・爆発音.mp3')),
-        hit: new Audio(encodeURI('Sounds/打撃音.mp3'))
+        hit: new Audio(encodeURI('Sounds/打撃音.mp3')),
+        critical: new Audio(encodeURI('Sounds/レーザー攻撃.mp3')) // 追加：クリティカル効果音
     };
-    const sfxDefaultVolume = { select: 0.7, decide: 0.7, correct: 0.7, wrong: 0.7, hit: 0.7 };
+    const sfxDefaultVolume = { select: 0.7, decide: 0.7, correct: 0.7, wrong: 0.7, hit: 0.7, critical: 0.8 };
     for (const key in sfx) {
-        sfx[key].volume = sfxDefaultVolume[key];
+        sfx[key].volume = sfxDefaultVolume[key] ?? 0.7;
     }
 
     const sfxTimers = {};
@@ -108,7 +109,7 @@
         { id: 6, bg: 'Images/stage/map06_アジト.png' }
     ];
 
-    // バトルポイントの座標（%指定）。実際のマップ画像に合わせて自由に調整してください。
+    // バトルポイントの座標（%指定）
     const NODE_POSITIONS = [
         { x: 18, y: 72 },
         { x: 32, y: 42 },
@@ -124,7 +125,6 @@
         { id: 'e7kagayaki', name: 'E7 かがやき', img: 'Images/CW/e7kagayaki.png' }
     ];
 
-    // ボス以外の敵はこの中からランダムに使用
     const NORMAL_ENEMY_IMAGES = [
         'Images/CW/敵1.png',
         'Images/CW/敵2.png',
@@ -178,13 +178,11 @@
         showScreen('map');
         playBgm('map');
         renderMap();
-        // STARTから飛んだときは常に演出を表示
         playStageIntro(currentStageId);
         progress.visitedStages[currentStageId] = true;
         saveProgress();
     }
 
-    // 初めて訪れるステージのときだけ演出を表示
     function maybeShowStageIntro() {
         if (!progress.visitedStages[currentStageId]) {
             playStageIntro(currentStageId);
@@ -327,7 +325,7 @@
     }
 
     /* ===================================================================
-       バトル画面
+       バトル画面 ＆ クリティカル機能
     =================================================================== */
     let currentHour = 3;
     let currentMinute = 0;
@@ -341,6 +339,39 @@
     let playerHP = PLAYER_MAX_HP;
     let enemyHP = ENEMY_MAX_HP;
     let enemyMaxHp = ENEMY_MAX_HP;
+
+    // クリティカルタイマー関連の変数
+    let criticalTimer = null;
+    let timeLeft = 10;
+    const MAX_TIME = 10;
+
+    function startCriticalTimer() {
+        clearInterval(criticalTimer);
+        timeLeft = MAX_TIME;
+
+        const bar = document.getElementById('critical-timer-bar');
+        if (bar) {
+            bar.style.transition = 'none';
+            bar.style.transform = 'scaleX(1)';
+        }
+
+        setTimeout(() => {
+            if (bar) {
+                bar.style.transition = `transform ${MAX_TIME}s linear`;
+                bar.style.transform = 'scaleX(0)';
+            }
+        }, 50);
+
+        const startTime = Date.now();
+        criticalTimer = setInterval(() => {
+            const elapsed = (Date.now() - startTime) / 1000;
+            timeLeft = Math.max(0, MAX_TIME - elapsed);
+            
+            if (timeLeft <= 0) {
+                clearInterval(criticalTimer);
+            }
+        }, 100);
+    }
 
     function renderHP() {
         const playerBar = document.getElementById('player-hp');
@@ -374,7 +405,6 @@
         el.classList.add('shake');
     }
 
-    // 攻撃側が一瞬前に出て戻るモーション（offsetPxは正で右、負で左に動く）
     function attackLunge(elementId, offsetPx) {
         const el = document.getElementById(elementId);
         el.style.transform = 'translateX(' + offsetPx + 'px)';
@@ -450,6 +480,7 @@
         targetHour = Math.floor(Math.random() * 12) + 1;
         targetMinute = Math.random() < 0.5 ? 0 : 30;
         drawClockHands(targetHour, targetMinute);
+        startCriticalTimer(); // 問題出題時に10秒タイマーをリセット＆スタート
     }
 
     function changeHour(delta) {
@@ -464,7 +495,6 @@
     function changeMinute() {
         if (isLocked) return;
         playSfx('select');
-        // 00と30の2値だけなので、押すたびに切り替えることで無限にループする
         currentMinute = currentMinute === 0 ? 30 : 0;
         document.getElementById('minute-display').innerText = String(currentMinute).padStart(2, '0');
     }
@@ -487,8 +517,6 @@
         const playerEl = document.getElementById('player');
         const enemyEl = document.getElementById('enemy');
 
-        // 前回のバトルの揺れ・光り演出のクラスが残っていることがあるため、
-        // バトル開始時に必ずリセットする（開始直後に味方が揺れて見えるバグの対策）
         playerEl.classList.remove('shake', 'hit-flash');
         enemyEl.classList.remove('shake', 'hit-flash');
         playerEl.style.transform = 'none';
@@ -535,11 +563,44 @@
     }
 
     function handleCorrect() {
+        clearInterval(criticalTimer);
+
+        // 10秒以内に解けていればクリティカル (2ダメージ)、切れていれば通常 (1ダメージ)
+        const isCritical = timeLeft > 0;
+        const damage = isCritical ? 2 : 1;
+
+        if (isCritical) {
+            // クリティカル演出（カットイン表示 ＆ レーザー攻撃.mp3再生）
+            showCriticalCutin(() => {
+                executeAttackAfterCutin(damage);
+            });
+        } else {
+            // 通常攻撃
+            executeAttackAfterCutin(damage);
+        }
+    }
+
+    function showCriticalCutin(callback) {
+        const cutin = document.getElementById('critical-cutin');
+        if (cutin) {
+            cutin.classList.add('show');
+            playSfx('critical'); // レーザー攻撃.mp3を再生
+
+            setTimeout(() => {
+                cutin.classList.remove('show');
+                if (callback) callback();
+            }, 750); // 0.75秒後にカットインを消して攻撃モーションへ
+        } else {
+            if (callback) callback();
+        }
+    }
+
+    function executeAttackAfterCutin(damage) {
         // シンカリオン（左）が右へ攻撃モーション
         attackLunge('player', 40);
 
         setTimeout(() => {
-            enemyHP = Math.max(0, enemyHP - 1);
+            enemyHP = Math.max(0, enemyHP - damage);
             renderHP();
             flashHit('enemy');
             shakeElement('enemy');
@@ -548,7 +609,8 @@
             playSfx(isFinishingBlow ? 'wrong' : 'hit'); // とどめは爆発音、通常は打撃音
 
             if (!isFinishingBlow) {
-                showMessage("てきは 1のダメージ！", 900);
+                const dmgText = damage === 2 ? "クリティカル！ てきに 2のダメージ！" : "てきは 1のダメージ！";
+                showMessage(dmgText, 900);
                 isLocked = true;
                 setTimeout(() => {
                     generateQuestion();
@@ -568,7 +630,6 @@
             const enemy = document.getElementById('enemy');
             const player = document.getElementById('player');
 
-            // 勝利モーション（軽くジャンプ）
             let hops = 0;
             const hopAnim = setInterval(() => {
                 hops++;
@@ -592,6 +653,8 @@
     }
 
     function handleWrong() {
+        clearInterval(criticalTimer);
+
         // 敵（右）が左へ攻撃モーション
         attackLunge('enemy', -40);
 
@@ -602,12 +665,15 @@
             shakeElement('player');
 
             const isFinishingBlow = playerHP <= 0;
-            playSfx(isFinishingBlow ? 'wrong' : 'hit'); // とどめは爆発音、通常は打撃音
+            playSfx(isFinishingBlow ? 'wrong' : 'hit');
 
             if (!isFinishingBlow) {
                 showMessage("みかたは 1のダメージ！", 900);
                 isLocked = true;
-                setTimeout(() => { isLocked = false; }, 900);
+                setTimeout(() => { 
+                    generateQuestion(); // 不正解時は次の問題（タイマー再始動）へ
+                    isLocked = false; 
+                }, 900);
                 return;
             }
 
