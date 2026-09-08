@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
@@ -91,7 +91,17 @@
         <div id="player"></div>
         <div id="enemy"></div>
 
+        <!-- クリティカルヒット時のカットイン演出 -->
+        <div id="critical-cutin">
+            <div class="cutin-text">クリティカルヒット！</div>
+        </div>
+
         <div id="bottom-panel">
+            <!-- 10秒クリティカルタイマーバー -->
+            <div id="critical-timer-container">
+                <div id="critical-timer-bar"></div>
+            </div>
+
             <div class="time-panel">
                 <div class="time-block">
                     <div class="stepper-row">
@@ -119,7 +129,7 @@
     </div>
 </div>
 
-<script src="game.js?v=3"></script>
+<script src="game.js?v=4"></script>
 
 </body>
 </html>
