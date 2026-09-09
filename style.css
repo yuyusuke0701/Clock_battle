@@ -506,7 +506,7 @@ body {
 /* カットイン時のシンカリオン画像（上半分など） */
 #critical-cutin-image {
     width: 80%;
-    max-height: 45%;
+    max-height: 220px; /* 高さを明示的に指定すると安定します */
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center bottom;
