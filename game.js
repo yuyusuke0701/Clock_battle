@@ -1,6 +1,6 @@
 /* ===================================================================
         画面サイズ対応：常に固定レイアウトを拡大縮小するだけにする
-    =================================================================== */
+    ================================================================== */
     function fitGame() {
         const container = document.getElementById('game-container');
         const scale = Math.min(window.innerWidth / 480, window.innerHeight / 800);
@@ -12,16 +12,32 @@
 
     /* ===================================================================
         サウンド関連
-    =================================================================== */
+    ================================================================== */
     let soundOn = true;
 
-    const mapBgm = new Audio(encodeURI('Sounds/勇敢な者たち.mp3'));
-    mapBgm.loop = true;
-    mapBgm.volume = 0.35;
+    // ステージごとのフィールドBGMマッピング
+    const STAGE_BGMS = {
+        1: new Audio(encodeURI('Sounds/オープニングオーケストラ「夜明け」.mp3')),
+        2: new Audio(encodeURI('Sounds/雲海.mp3')),
+        3: new Audio(encodeURI('Sounds/遠い空へ.mp3')),
+        4: new Audio(encodeURI('Sounds/試練の道.mp3')),
+        5: new Audio(encodeURI('Sounds/秘境の地.mp3')),
+        6: new Audio(encodeURI('Sounds/ブラックファクトリー.mp3'))
+    };
 
-    const battleBgm = new Audio(encodeURI('Sounds/bgm.mp3'));
+    // バトル用・ボス用のBGM
+    const battleBgm = new Audio(encodeURI('Sounds/炎乱.mp3'));
+    const bossBgm = new Audio(encodeURI('Sounds/Battle_in_the_Moonlight.mp3'));
+
+    // すべてのBGMのループとボリュームを設定
+    for (const key in STAGE_BGMS) {
+        STAGE_BGMS[key].loop = true;
+        STAGE_BGMS[key].volume = 0.35;
+    }
     battleBgm.loop = true;
     battleBgm.volume = 0.35;
+    bossBgm.loop = true;
+    bossBgm.volume = 0.35;
 
     const sfx = {
         select: new Audio(encodeURI('Sounds/セレクト音風な効果音.mp3')),
@@ -73,16 +89,26 @@
         }, fadeStartMs);
     }
 
-    function playBgm(which) {
-        if (!soundOn) return;
-        mapBgm.pause();
-        battleBgm.pause();
-        if (which === 'map') mapBgm.play().catch(() => {});
-        if (which === 'battle') battleBgm.play().catch(() => {});
-    }
     function stopAllBgm() {
-        mapBgm.pause();
+        for (const key in STAGE_BGMS) {
+            STAGE_BGMS[key].pause();
+        }
         battleBgm.pause();
+        bossBgm.pause();
+    }
+
+    function playBgm(type, stageId) {
+        if (!soundOn) return;
+        stopAllBgm();
+
+        if (type === 'map') {
+            const bgm = STAGE_BGMS[stageId] || STAGE_BGMS[1];
+            bgm.play().catch(() => {});
+        } else if (type === 'battle') {
+            battleBgm.play().catch(() => {});
+        } else if (type === 'boss') {
+            bossBgm.play().catch(() => {});
+        }
     }
 
     function toggleSound() {
@@ -91,14 +117,17 @@
         if (!soundOn) {
             stopAllBgm();
         } else {
-            if (currentScreen === 'map') playBgm('map');
-            if (currentScreen === 'battle') playBgm('battle');
+            if (currentScreen === 'map') playBgm('map', currentStageId);
+            if (currentScreen === 'battle') {
+                const isBoss = pendingNodeIndex === 5;
+                playBgm(isBoss ? 'boss' : 'battle');
+            }
         }
     }
 
     /* ===================================================================
         ゲームデータ
-    =================================================================== */
+    ================================================================== */
     const STAGES = [
         { id: 1, bg: 'Images/stage/map01_メタバース空間.png' },
         { id: 2, bg: 'Images/stage/map02_森.png' },
@@ -162,7 +191,7 @@
 
     /* ===================================================================
         画面切り替え
-    =================================================================== */
+    ================================================================== */
     function showScreen(name) {
         document.getElementById('screen-top').style.display = name === 'top' ? 'flex' : 'none';
         document.getElementById('screen-map').style.display = name === 'map' ? 'block' : 'none';
@@ -174,7 +203,7 @@
     function startGame() {
         playSfx('decide');
         showScreen('map');
-        playBgm('map');
+        playBgm('map', currentStageId);
         renderMap();
         playStageIntro(currentStageId);
         progress.visitedStages[currentStageId] = true;
@@ -191,7 +220,7 @@
 
     /* ===================================================================
         マップ画面
-    =================================================================== */
+    ================================================================== */
     function playStageIntro(stageId) {
         const intro = document.getElementById('stage-intro');
         const text = document.getElementById('stage-intro-text');
@@ -245,6 +274,7 @@
         playSfx('select');
         currentStageId--;
         renderMap();
+        playBgm('map', currentStageId);
         maybeShowStageIntro();
     }
     function nextStage() {
@@ -252,6 +282,7 @@
         playSfx('select');
         currentStageId++;
         renderMap();
+        playBgm('map', currentStageId);
         maybeShowStageIntro();
     }
 
@@ -284,7 +315,7 @@
 
     /* ===================================================================
         メニュー / しれいしつ
-    =================================================================== */
+    ================================================================== */
     function openMenu() {
         playSfx('select');
         document.getElementById('menu-overlay').style.display = 'flex';
@@ -324,7 +355,7 @@
 
     /* ===================================================================
         バトル画面 ＆ クリティカル機能
-    =================================================================== */
+    ================================================================== */
     let currentHour = 3;
     let currentMinute = 0;
     let targetHour = 3;
@@ -509,7 +540,8 @@
 
     function startBattle(nodeIndex) {
         showScreen('battle');
-        playBgm('battle');
+        const isBoss = nodeIndex === 5;
+        playBgm(isBoss ? 'boss' : 'battle');
 
         const playerEl = document.getElementById('player');
         const enemyEl = document.getElementById('enemy');
@@ -521,7 +553,6 @@
         const charDef = CHARACTERS.find(c => c.id === progress.selectedCharacter) || CHARACTERS[0];
         playerEl.style.backgroundImage = "url('" + charDef.img + "')";
 
-        const isBoss = nodeIndex === 5;
         if (isBoss) {
             enemyEl.style.backgroundImage = "url('Images/CW/hades.png')";
         } else {
@@ -546,7 +577,7 @@
         if (isLocked) return;
         playSfx('select');
         showScreen('map');
-        playBgm('map');
+        playBgm('map', currentStageId);
         renderMap();
     }
 
@@ -644,7 +675,7 @@
                 player.style.transform = "none";
                 onNodeCleared();
                 showScreen('map');
-                playBgm('map');
+                playBgm('map', currentStageId);
                 renderMap();
                 isLocked = false;
             }, 2000);
@@ -679,7 +710,7 @@
             showMessage("ゲームオーバー！", 1800);
             setTimeout(() => {
                 showScreen('map');
-                playBgm('map');
+                playBgm('map', currentStageId);
                 renderMap();
                 isLocked = false;
             }, 1800);
@@ -688,5 +719,5 @@
 
     /* ===================================================================
         初期化
-    =================================================================== */
+    ================================================================== */
     showScreen('top');
