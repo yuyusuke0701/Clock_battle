@@ -323,6 +323,7 @@ body {
     left: 15px;
     width: 210px;
     height: 240px;
+    background-image: url('Images/CW/e5hayabusa.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center bottom;
