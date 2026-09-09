@@ -1,5 +1,5 @@
 /* ===================================================================
-       画面サイズ対応：常に固定レイアウトを拡大縮小するだけにする
+        画面サイズ対応：常に固定レイアウトを拡大縮小するだけにする
     =================================================================== */
     function fitGame() {
         const container = document.getElementById('game-container');
@@ -11,7 +11,7 @@
     fitGame();
 
     /* ===================================================================
-       サウンド関連
+        サウンド関連
     =================================================================== */
     let soundOn = true;
 
@@ -97,7 +97,7 @@
     }
 
     /* ===================================================================
-       ゲームデータ
+        ゲームデータ
     =================================================================== */
     const STAGES = [
         { id: 1, bg: 'Images/stage/map01_メタバース空間.png' },
@@ -161,7 +161,7 @@
     let pendingNodeIndex = null;
 
     /* ===================================================================
-       画面切り替え
+        画面切り替え
     =================================================================== */
     function showScreen(name) {
         document.getElementById('screen-top').style.display = name === 'top' ? 'flex' : 'none';
@@ -190,7 +190,7 @@
     }
 
     /* ===================================================================
-       マップ画面
+        マップ画面
     =================================================================== */
     function playStageIntro(stageId) {
         const intro = document.getElementById('stage-intro');
@@ -283,7 +283,7 @@
     }
 
     /* ===================================================================
-       メニュー / しれいしつ
+        メニュー / しれいしつ
     =================================================================== */
     function openMenu() {
         playSfx('select');
@@ -323,7 +323,7 @@
     }
 
     /* ===================================================================
-       バトル画面 ＆ クリティカル機能
+        バトル画面 ＆ クリティカル機能
     =================================================================== */
     let currentHour = 3;
     let currentMinute = 0;
@@ -576,11 +576,13 @@
 
     function showCriticalCutin(callback) {
         const cutin = document.getElementById('critical-cutin');
-        const imgEl = document.getElementById('cutin-chara-img');
         
-        if (cutin && imgEl) {
+        if (cutin) {
             const charDef = CHARACTERS.find(c => c.id === progress.selectedCharacter) || CHARACTERS[0];
-            imgEl.src = charDef.img;
+            const imgEl = document.getElementById('critical-cutin-image');
+            if (imgEl) {
+                imgEl.style.backgroundImage = "url('" + charDef.img + "')";
+            }
 
             cutin.classList.add('show');
             playSfx('critical');
@@ -685,6 +687,6 @@
     }
 
     /* ===================================================================
-       初期化
+        初期化
     =================================================================== */
     showScreen('top');
