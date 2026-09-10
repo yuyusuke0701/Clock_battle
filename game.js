@@ -149,7 +149,13 @@
     const CHARACTERS = [
         { id: 'e5hayabusa', name: 'E5 はやぶさ', img: 'Images/CW/e5hayabusa.png' },
         { id: 'e6komachi', name: 'E6 こまち', img: 'Images/CW/e6komachi.png' },
-        { id: 'e7kagayaki', name: 'E7 かがやき', img: 'Images/CW/e7kagayaki.png' }
+        { id: 'e7kagayaki', name: 'E7 かがやき', img: 'Images/CW/e7kagayaki.png' },
+        { id: 'e8tsubasa', name: 'E8 つばさ', img: 'Images/CW/e8tsubasa.png' },
+        { id: 'h5hayabusa', name: 'H5 はやぶさ', img: 'Images/CW/h5hayabusa.png' },
+        { id: 'n700skamome', name: 'N700S かもめ', img: 'Images/CW/n700skamome.png' },
+        { id: 'n700snozomi', name: 'N700S のぞみ', img: 'Images/CW/n700snozomi.png' },
+        { id: 'yellow', name: 'ドクターイエロー', img: 'Images/CW/yellow.png' },
+        { id: 'srg', name: 'SRG', img: 'Images/CW/srg.png' }     
     ];
 
     const NORMAL_ENEMY_IMAGES = [
