@@ -308,7 +308,7 @@ body {
     border-color: transparent #fff transparent transparent;
 }
 
-/* 4列グリッド＆枠線なし・省スペース化 */
+/* 4列グリッド＆顔画像の角を角丸にせず、長方形のまま（角を切らない） */
 #character-grid {
     flex: 1;
     display: grid;
@@ -325,7 +325,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 2px;
-    border-radius: 8px;
+    border-radius: 4px;
     border: none;
     background: transparent;
     cursor: pointer;
@@ -338,8 +338,8 @@ body {
 }
 .character-face-thumb {
     width: 44px;
-    height: 44px;
-    border-radius: 50%;
+    height: 22px;
+    border-radius: 0; /* 角を切らない（直角にする） */
     background-size: cover;
     background-position: center;
     border: 2px solid #fff;
