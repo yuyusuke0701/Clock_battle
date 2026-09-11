@@ -208,20 +208,11 @@
 
     function startGame() {
         playSfx('decide');
-        showScreen('map');
-        playBgm('map', currentStageId);
-        renderMap();
-        playStageIntro(currentStageId);
-        progress.visitedStages[currentStageId] = true;
-        saveProgress();
+        enterMap(true); // STARTからは常にステージ演出を表示
     }
 
     function maybeShowStageIntro() {
-        if (!progress.visitedStages[currentStageId]) {
-            playStageIntro(currentStageId);
-            progress.visitedStages[currentStageId] = true;
-            saveProgress();
-        }
+        // 互換用に残置（現在はenterMapが常に演出を出すため未使用）
     }
 
     /* ===================================================================
@@ -234,6 +225,30 @@
         intro.classList.remove('show');
         void intro.offsetWidth;
         intro.classList.add('show');
+    }
+
+    // マップ画面に入る/ステージを切り替える際の共通処理。
+    // 必ずcurrentStageIdを使うことで「違うステージ番号が表示される」誤表示を防止する。
+    // 演出中はBGMを一瞬オフし、演出が終わるタイミングでそのステージのBGMを再開する。
+    const STAGE_INTRO_DURATION_MS = 2000;
+
+    function enterMap(showIntro) {
+        showScreen('map');
+        renderMap();
+
+        if (showIntro) {
+            stopAllBgm();
+            playStageIntro(currentStageId);
+            clearTimeout(enterMap._bgmTimer);
+            enterMap._bgmTimer = setTimeout(() => {
+                playBgm('map', currentStageId);
+            }, STAGE_INTRO_DURATION_MS);
+        } else {
+            playBgm('map', currentStageId);
+        }
+
+        progress.visitedStages[currentStageId] = true;
+        saveProgress();
     }
 
     function showMapToast(text) {
@@ -279,17 +294,13 @@
         if (currentStageId <= 1) return;
         playSfx('select');
         currentStageId--;
-        renderMap();
-        playBgm('map', currentStageId);
-        maybeShowStageIntro();
+        enterMap(true);
     }
     function nextStage() {
         if (currentStageId >= progress.unlockedStage) return;
         playSfx('select');
         currentStageId++;
-        renderMap();
-        playBgm('map', currentStageId);
-        maybeShowStageIntro();
+        enterMap(true);
     }
 
     function selectNode(i) {
@@ -549,6 +560,10 @@
         const isBoss = nodeIndex === 5;
         playBgm(isBoss ? 'boss' : 'battle');
 
+        // バトル背景をステージのマップ背景とリンクさせる
+        const stageDef = STAGES[currentStageId - 1];
+        document.getElementById('screen-battle').style.backgroundImage = "url('" + stageDef.bg + "')";
+
         const playerEl = document.getElementById('player');
         const enemyEl = document.getElementById('enemy');
 
@@ -582,9 +597,7 @@
     function backToMap() {
         if (isLocked) return;
         playSfx('select');
-        showScreen('map');
-        playBgm('map', currentStageId);
-        renderMap();
+        enterMap(false); // 同じステージに戻るだけなので演出なし
     }
 
     function onNodeCleared() {
@@ -646,7 +659,7 @@
             playSfx(isFinishingBlow ? 'wrong' : 'hit');
 
             if (!isFinishingBlow) {
-                const dmgText = damage === 2 ? "クリティカル！ てきに 2のダメージ！" : "てきは 1のダメージ！";
+                const dmgText = damage === 2 ? "クリティカル！\nてきに 2のダメージ！" : "てきは 1のダメージ！";
                 showMessage(dmgText, 900);
                 isLocked = true;
                 setTimeout(() => {
@@ -680,9 +693,7 @@
             setTimeout(() => {
                 player.style.transform = "none";
                 onNodeCleared();
-                showScreen('map');
-                playBgm('map', currentStageId);
-                renderMap();
+                enterMap(true);
                 isLocked = false;
             }, 2000);
         }, 150);
@@ -715,9 +726,7 @@
             isLocked = true;
             showMessage("ゲームオーバー！", 1800);
             setTimeout(() => {
-                showScreen('map');
-                playBgm('map', currentStageId);
-                renderMap();
+                enterMap(true);
                 isLocked = false;
             }, 1800);
         }, 150);

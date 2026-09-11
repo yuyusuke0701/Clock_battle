@@ -117,16 +117,16 @@ body {
 }
 #menu-btn {
     position: absolute;
-    top: 8px;
-    right: 65px;
+    top: 48px;
+    right: 10px;
     z-index: 25;
     background: rgba(0,0,0,0.6);
     border: 2px solid #fff;
     color: #fff;
     border-radius: 20px;
-    padding: 5px 12px;
+    padding: 8px 16px;
     font-weight: bold;
-    font-size: 13px;
+    font-size: 15px;
     cursor: pointer;
 }
 #map-nodes {
@@ -233,7 +233,7 @@ body {
 }
 
 /* ポップアップ共通 */
-#node-popup, #menu-overlay, #shireishitsu-overlay {
+#node-popup, #menu-overlay {
     position: absolute;
     inset: 0;
     background: rgba(0,0,0,0.55);
@@ -241,6 +241,121 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 60;
+}
+
+/* ===== しれいしつ：画面いっぱいの専用レイアウト ===== */
+#shireishitsu-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    z-index: 60;
+    padding: 12px;
+    box-sizing: border-box;
+}
+#shireishitsu-box {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(20,30,55,0.98), rgba(2,6,23,0.98));
+    border: 2px solid #38bdf8;
+    border-radius: 18px;
+    box-shadow: 0 0 25px rgba(56,189,248,0.5);
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* しれいかんのコメント */
+#commander-intro {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    margin-bottom: 10px;
+}
+#commander-face {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-image: url('Images/CW/kadomichi_up.png');
+    background-size: cover;
+    background-position: center top;
+    border: 2px solid #fff;
+    flex-shrink: 0;
+    box-shadow: 0 0 10px rgba(56,189,248,0.6);
+}
+.speech-bubble {
+    position: relative;
+    background: #fff;
+    color: #111;
+    border-radius: 14px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 1.4;
+    text-align: left;
+    white-space: nowrap;
+}
+.speech-bubble::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: 18px;
+    border-width: 8px 10px 8px 0;
+    border-style: solid;
+    border-color: transparent #fff transparent transparent;
+}
+
+/* シンカリオン横スクロール選択 */
+#character-list {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    padding: 4px 6px;
+    min-height: 0;
+}
+.character-card {
+    flex: 0 0 auto;
+    width: 44%;
+    scroll-snap-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 14px;
+    border: 2px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.06);
+    cursor: pointer;
+    box-sizing: border-box;
+}
+.character-card.selected {
+    border-color: #fde047;
+    box-shadow: 0 0 18px #fde047;
+}
+.character-thumb {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.character-name {
+    margin-top: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+#shireishitsu-box .btn-secondary {
+    margin-top: 12px;
 }
 .popup-box {
     background: linear-gradient(180deg, rgba(20,30,55,0.98), rgba(2,6,23,0.98));
@@ -256,7 +371,7 @@ body {
     font-size: 17px;
     letter-spacing: 1px;
 }
-.popup-box button {
+.btn-primary, .btn-secondary {
     display: block;
     width: 100%;
     margin-top: 10px;
@@ -266,6 +381,8 @@ body {
     font-weight: 900;
     font-size: 15px;
     cursor: pointer;
+    flex-shrink: 0;
+    box-sizing: border-box;
 }
 .btn-primary {
     background: linear-gradient(180deg, #f472b6, #db2777);
@@ -277,45 +394,12 @@ body {
     border: 1px solid rgba(255,255,255,0.3) !important;
 }
 
-#character-list {
-    display: flex;
-    gap: 12px;
-    margin: 16px 0;
-    flex-wrap: wrap;
-    justify-content: center;
-    max-width: 280px;
-}
-.character-card {
-    width: 105px;
-    padding: 10px;
-    border-radius: 12px;
-    border: 2px solid rgba(255,255,255,0.25);
-    background: rgba(255,255,255,0.06);
-    cursor: pointer;
-}
-.character-card.selected {
-    border-color: #fde047;
-    box-shadow: 0 0 14px #fde047;
-}
-.character-thumb {
-    width: 100%;
-    height: 85px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-}
-.character-name {
-    margin-top: 6px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
 /* ③ バトル画面 */
 #screen-battle {
-    background-image: url('Images/1788178692039.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    background-color: #0f172a;
 }
 #player {
     position: absolute;
@@ -693,6 +777,7 @@ body {
     text-align: center;
     pointer-events: none;
     white-space: pre-line;
+    word-break: keep-all;
     max-width: 82%;
 }
 #message-overlay.show {
