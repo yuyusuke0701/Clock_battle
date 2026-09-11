@@ -308,10 +308,10 @@ body {
     border-color: transparent #fff transparent transparent;
 }
 
-/* 4列グリッド：最大2行まで表示しスクロールを設定、下部プレビューを限界まで上に拡大 */
+/* 4列グリッド：最大2行まで表示してスクロール */
 #character-grid {
     flex: 0 0 auto;
-    max-height: 240px; /* 2行分がおさまり、超過分はスクロール */
+    max-height: 240px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-auto-rows: minmax(88px, 100px);
@@ -357,24 +357,24 @@ body {
     flex-shrink: 0;
 }
 
-/* 下部：残りのエリアいっぱいに上に引き伸ばしたプレビューエリア */
+/* 下部プレビューエリア：縦方向にしっかり広げる */
 #character-preview-area {
-    flex: 1; /* 残りのスペースをすべて占有して大きく伸ばす */
+    flex: 1; /* 残りのスペースを大きく占有 */
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
     background: rgba(0,0,0,0.6);
     border: 2px solid #38bdf8;
     border-radius: 16px;
-    padding: 12px 18px;
-    margin-top: 6px;
+    padding: 20px 24px; /* 上下左右のパディングを増やして縦方向にボリュームを持たせる */
+    margin-top: 8px;
     box-shadow: 0 0 20px rgba(56,189,248,0.4);
-    min-height: 0;
+    min-height: 160px; /* 最低の高さを確保して縦長に保つ */
 }
 #character-preview-img {
-    width: 140px; /* エリア内で最大化 */
+    width: 160px; /* 機体画像自体も縦横ともに大きく表示 */
     height: 100%;
-    max-height: 160px;
+    min-height: 130px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center bottom;
@@ -393,10 +393,10 @@ body {
     letter-spacing: 1px;
 }
 #character-preview-name {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 900;
     color: #fff;
-    margin-top: 4px;
+    margin-top: 6px;
 }
 
 #shireishitsu-box .btn-secondary {
