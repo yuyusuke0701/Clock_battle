@@ -357,22 +357,22 @@ body {
     flex-shrink: 0;
 }
 
-/* 下部プレビューエリア：縦方向にしっかり広げる */
+/* 下部プレビューエリア：一番下の「しゅつげき」ボタンの上に配置され、縦方向に大きく広げる */
 #character-preview-area {
-    flex: 1; /* 残りのスペースを大きく占有 */
+    flex: 1;
     display: flex;
     align-items: center;
     gap: 20px;
     background: rgba(0,0,0,0.6);
     border: 2px solid #38bdf8;
     border-radius: 16px;
-    padding: 20px 24px; /* 上下左右のパディングを増やして縦方向にボリュームを持たせる */
+    padding: 20px 24px;
     margin-top: 8px;
     box-shadow: 0 0 20px rgba(56,189,248,0.4);
-    min-height: 160px; /* 最低の高さを確保して縦長に保つ */
+    min-height: 0;
 }
 #character-preview-img {
-    width: 160px; /* 機体画像自体も縦横ともに大きく表示 */
+    width: 160px;
     height: 100%;
     min-height: 130px;
     background-size: contain;
@@ -397,6 +397,28 @@ body {
     font-weight: 900;
     color: #fff;
     margin-top: 6px;
+}
+
+/* ポンプアップ最下部に配置する「しゅつげき」ボタン（青系） */
+#sortie-btn, .back-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    border: 2px solid #38bdf8;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 900;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 8px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+    letter-spacing: 2px;
+}
+#sortie-btn:hover, .back-btn:hover {
+    background: linear-gradient(135deg, #0369a1, #075985);
+    border-color: #7dd3fc;
 }
 
 #shireishitsu-box .btn-secondary {
