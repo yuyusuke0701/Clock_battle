@@ -308,11 +308,12 @@ body {
     border-color: transparent #fff transparent transparent;
 }
 
-/* 4列グリッド＆顔画像の角を角丸にせず、長方形のまま（角を切らない） */
+/* 4列グリッド：グリッド全体の行の縦幅を半分（高さ自体を詰める）に変更 */
 #character-grid {
     flex: 1;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(36px, 46px); /* グリッドの行の高さを詰める */
     gap: 4px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -324,12 +325,13 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2px;
+    padding: 1px;
     border-radius: 4px;
     border: none;
     background: transparent;
     cursor: pointer;
     box-sizing: border-box;
+    height: 100%;
 }
 .character-face-card.selected {
     border: 2px solid #fde047;
@@ -338,18 +340,19 @@ body {
 }
 .character-face-thumb {
     width: 44px;
-    height: 22px;
-    border-radius: 0; /* 角を切らない（直角にする） */
+    height: 44px; /* 画像サイズはそのまま維持 */
+    border-radius: 0;
     background-size: cover;
     background-position: center;
     border: 2px solid #fff;
     background-color: #000;
 }
 .character-face-name {
-    margin-top: 2px;
-    font-size: 9px;
+    margin-top: 1px;
+    font-size: 8px;
     font-weight: bold;
     text-align: center;
+    line-height: 1;
 }
 
 /* 下部：大きく表示する機体プレビューエリア */
