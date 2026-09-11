@@ -372,7 +372,7 @@ body {
     min-height: 160px; /* 最低の高さを確保して縦長に保つ */
 }
 #character-preview-img {
-    width: 160px;
+    width: 220px;
     height: 100%;
     min-height: 130px;
     background-size: contain;
