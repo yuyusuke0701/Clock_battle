@@ -308,12 +308,12 @@ body {
     border-color: transparent #fff transparent transparent;
 }
 
-/* 4列グリッド：縦幅を1.5倍に伸ばし、画像をグリッド内いっぱいに拡大 */
+/* 4列グリッド：グリッド内の画像を正方形にするため縦幅をさらに伸ばし、下部プレビューを大きく拡大 */
 #character-grid {
     flex: 1;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: minmax(68px, 80px); /* 縦幅を約1.5倍に拡張 */
+    grid-auto-rows: minmax(88px, 100px); /* 正方形を維持できるよう縦幅を拡大 */
     gap: 6px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -339,9 +339,8 @@ body {
     background: rgba(253,224,71,0.15);
 }
 .character-face-thumb {
-    width: 100%; /* 横幅いっぱい */
-    flex: 1;     /* 残りの縦幅をフル活用して拡大 */
-    min-height: 45px;
+    width: 100%; /* 横幅いっぱいに合わせて、正方形（1:1）になるよう高さを同期 */
+    aspect-ratio: 1 / 1;
     border-radius: 0;
     background-size: cover;
     background-position: center;
@@ -354,25 +353,25 @@ body {
     font-weight: bold;
     text-align: center;
     line-height: 1;
-    flex-shrink: 0; /* 機体名が画像に潰されないよう保護 */
+    flex-shrink: 0;
 }
 
-/* 下部：大きく表示する機体プレビューエリア */
+/* 下部：空いたエリアいっぱいに機体を大きく表示するプレビューエリア */
 #character-preview-area {
     display: flex;
     align-items: center;
-    gap: 12px;
-    background: rgba(0,0,0,0.5);
+    gap: 16px;
+    background: rgba(0,0,0,0.6);
     border: 2px solid #38bdf8;
-    border-radius: 14px;
-    padding: 10px 14px;
-    margin-top: 8px;
+    border-radius: 16px;
+    padding: 14px 18px;
+    margin-top: 10px;
     flex-shrink: 0;
-    box-shadow: 0 0 15px rgba(56,189,248,0.3);
+    box-shadow: 0 0 20px rgba(56,189,248,0.4);
 }
 #character-preview-img {
-    width: 80px;
-    height: 80px;
+    width: 130px; /* エリアいっぱいに大きく表示 */
+    height: 130px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center bottom;
@@ -385,16 +384,16 @@ body {
     justify-content: center;
 }
 .preview-label {
-    font-size: 10px;
+    font-size: 11px;
     color: #38bdf8;
     font-weight: bold;
     letter-spacing: 1px;
 }
 #character-preview-name {
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 900;
     color: #fff;
-    margin-top: 2px;
+    margin-top: 4px;
 }
 
 #shireishitsu-box .btn-secondary {
