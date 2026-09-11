@@ -230,7 +230,7 @@
     // マップ画面に入る/ステージを切り替える際の共通処理。
     // 必ずcurrentStageIdを使うことで「違うステージ番号が表示される」誤表示を防止する。
     // 演出中はBGMを一瞬オフし、演出が終わるタイミングでそのステージのBGMを再開する。
-    const STAGE_INTRO_DURATION_MS = 2000;
+    const STAGE_INTRO_DURATION_MS = 1000;
 
     function enterMap(showIntro) {
         showScreen('map');

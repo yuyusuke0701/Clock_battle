@@ -206,7 +206,7 @@ body {
     pointer-events: none;
 }
 #stage-intro.show {
-    animation: stageIntroAnim 2s ease forwards;
+    animation: stageIntroAnim 1s ease forwards;
 }
 #stage-intro-text {
     font-family: 'Orbitron', sans-serif;
@@ -217,7 +217,7 @@ body {
     letter-spacing: 2px;
 }
 #stage-intro.show #stage-intro-text {
-    animation: textPop 2s ease forwards;
+    animation: textPop 1s ease forwards;
 }
 @keyframes stageIntroAnim {
     0% { opacity: 0; }
@@ -323,7 +323,7 @@ body {
 }
 .character-card {
     flex: 0 0 auto;
-    width: 44%;
+    width: 78%;
     scroll-snap-align: center;
     display: flex;
     flex-direction: column;
