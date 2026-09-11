@@ -308,15 +308,15 @@ body {
     border-color: transparent #fff transparent transparent;
 }
 
-/* 3列グリッド表示 */
+/* 4列グリッド＆枠線なし・省スペース化 */
 #character-grid {
     flex: 1;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 4px;
+    padding: 2px;
     min-height: 0;
 }
 .character-face-card {
@@ -324,21 +324,21 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 6px;
-    border-radius: 12px;
-    border: 2px solid rgba(255,255,255,0.25);
-    background: rgba(255,255,255,0.06);
+    padding: 2px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
     cursor: pointer;
     box-sizing: border-box;
 }
 .character-face-card.selected {
-    border-color: #fde047;
-    box-shadow: 0 0 14px #fde047;
+    border: 2px solid #fde047;
+    box-shadow: 0 0 10px #fde047;
     background: rgba(253,224,71,0.15);
 }
 .character-face-thumb {
-    width: 52px;
-    height: 52px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background-size: cover;
     background-position: center;
@@ -346,27 +346,28 @@ body {
     background-color: #000;
 }
 .character-face-name {
-    margin-top: 4px;
-    font-size: 10px;
+    margin-top: 2px;
+    font-size: 9px;
     font-weight: bold;
     text-align: center;
 }
 
-/* 下部：選択中キャラクターのプレビューエリア */
+/* 下部：大きく表示する機体プレビューエリア */
 #character-preview-area {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(56,189,248,0.3);
-    border-radius: 12px;
-    padding: 8px 12px;
-    margin-top: 10px;
+    gap: 12px;
+    background: rgba(0,0,0,0.5);
+    border: 2px solid #38bdf8;
+    border-radius: 14px;
+    padding: 10px 14px;
+    margin-top: 8px;
     flex-shrink: 0;
+    box-shadow: 0 0 15px rgba(56,189,248,0.3);
 }
 #character-preview-img {
-    width: 48px;
-    height: 48px;
+    width: 80px;
+    height: 80px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center bottom;
@@ -376,16 +377,19 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
+    justify-content: center;
 }
 .preview-label {
-    font-size: 9px;
+    font-size: 10px;
     color: #38bdf8;
     font-weight: bold;
+    letter-spacing: 1px;
 }
 #character-preview-name {
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 900;
     color: #fff;
+    margin-top: 2px;
 }
 
 #shireishitsu-box .btn-secondary {
