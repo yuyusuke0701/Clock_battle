@@ -50,7 +50,7 @@
         </div>
     </div>
 
-<!-- しれいしつ（シンカリオン選択） -->
+    <!-- しれいしつ（シンカリオン選択） -->
     <div id="shireishitsu-overlay">
         <div id="shireishitsu-box">
             <div id="commander-intro">
@@ -59,12 +59,18 @@
             </div>
             <!-- 顔部画像の格子状リスト -->
             <div id="character-grid"></div>
-            <!-- 選択されたキャラクターの全身画像表示エリア -->
-            <div id="character-preview-container">
+            
+            <!-- 選択されたキャラクターのプレビューエリア（大きく広げる） -->
+            <div id="character-preview-area">
                 <div id="character-preview-img"></div>
-                <div id="character-preview-name"></div>
+                <div id="character-preview-info">
+                    <span class="preview-label">せんたくちゅう</span>
+                    <div id="character-preview-name">-</div>
+                </div>
             </div>
-            <button class="btn-secondary" onclick="closeShireishitsu()">もどる</button>
+
+            <!-- 一番下に配置する「しゅつげき」ボタン -->
+            <button id="sortie-btn" onclick="closeShireishitsu()">しゅつげき</button>
         </div>
     </div>
 
