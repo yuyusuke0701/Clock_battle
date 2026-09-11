@@ -352,21 +352,42 @@
         document.getElementById('shireishitsu-overlay').style.display = 'none';
     }
     function renderShireishitsu() {
-        const list = document.getElementById('character-list');
-        list.innerHTML = '';
+        const grid = document.getElementById('character-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        
+        const previewImg = document.getElementById('character-preview-img');
+        const previewName = document.getElementById('character-preview-name');
+
+        // 現在選択中のキャラクター情報を取得
+        const selectedChar = CHARACTERS.find(c => c.id === progress.selectedCharacter) || CHARACTERS[0];
+        
+        // 下部の全身画像プレビューを更新
+        if (previewImg) {
+            previewImg.style.backgroundImage = "url('" + selectedChar.img + "')";
+        }
+        if (previewName) {
+            previewName.innerText = selectedChar.name;
+        }
+
         CHARACTERS.forEach(c => {
             const card = document.createElement('div');
-            card.className = 'character-card' + (progress.selectedCharacter === c.id ? ' selected' : '');
+            card.className = 'character-face-card' + (progress.selectedCharacter === c.id ? ' selected' : '');
+            
+            // キャラクターファイルの後ろに _up.png を付与した顔画像パスを生成
+            const faceImgPath = c.img.replace('.png', '_up.png');
+
             card.innerHTML =
-                '<div class="character-thumb" style="background-image:url(\'' + c.img + '\')"></div>' +
-                '<div class="character-name">' + c.name + '</div>';
+                '<div class="character-face-thumb" style="background-image:url(\'' + faceImgPath + '\')"></div>' +
+                '<div class="character-face-name">' + c.name + '</div>';
+
             card.onclick = () => {
                 playSfx('select');
                 progress.selectedCharacter = c.id;
                 saveProgress();
                 renderShireishitsu();
             };
-            list.appendChild(card);
+            grid.appendChild(card);
         });
     }
 
