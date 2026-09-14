@@ -267,17 +267,17 @@ body {
     overflow: hidden;
 }
 
-/* しれいかんのコメント */
+/* しれいかんのコメント（顔画像を若干縮小して機体名と重ならないように調整） */
 #commander-intro {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     flex-shrink: 0;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 #commander-face {
-    width: 60px;
-    height: 60px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     background-image: url('Images/CW/kadomichi_up.png');
     background-size: cover;
@@ -291,8 +291,8 @@ body {
     background: #fff;
     color: #111;
     border-radius: 14px;
-    padding: 10px 14px;
-    font-size: 13px;
+    padding: 8px 12px;
+    font-size: 12px;
     font-weight: bold;
     line-height: 1.4;
     text-align: left;
@@ -302,7 +302,7 @@ body {
     content: '';
     position: absolute;
     left: -9px;
-    top: 18px;
+    top: 14px;
     border-width: 8px 10px 8px 0;
     border-style: solid;
     border-color: transparent #fff transparent transparent;
@@ -357,46 +357,56 @@ body {
     flex-shrink: 0;
 }
 
-/* 下部プレビューエリア：一番下の「しゅつげき」ボタンの上に配置され、縦方向に大きく広げる */
+/* 下部プレビューエリア：上下に配置し、機体を上部に・プロフィールを下部に横幅いっぱいで表示 */
 #character-preview-area {
     flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 20px;
+    justify-content: flex-start;
     background: rgba(0,0,0,0.6);
     border: 2px solid #38bdf8;
     border-radius: 16px;
-    padding: 20px 24px;
+    padding: 10px 14px;
     margin-top: 8px;
     box-shadow: 0 0 20px rgba(56,189,248,0.4);
-    min-height: 160px; /* 最低の高さを確保して縦長に保つ */
+    min-height: 0;
+    overflow: hidden;
 }
 #character-preview-img {
-    width: 220px;
-    height: 100%;
-    min-height: 130px;
+    width: 100%;
+    height: 110px;
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: center bottom;
+    background-position: center top;
     flex-shrink: 0;
+    margin-bottom: 4px;
 }
 #character-preview-info {
-    flex: 1;
+    width: 100%;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     justify-content: center;
+    flex: 1;
+    min-height: 0;
 }
 .preview-label {
-    font-size: 11px;
+    font-size: 10px;
     color: #38bdf8;
     font-weight: bold;
     letter-spacing: 1px;
+    margin-bottom: 2px;
 }
 #character-preview-name {
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 900;
     color: #fff;
-    margin-top: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    line-height: 1.2;
 }
 
 /* ポンプアップ最下部に配置する「しゅつげき」ボタン（青系） */
