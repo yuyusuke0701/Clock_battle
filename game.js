@@ -126,7 +126,7 @@
     }
 
     /* ===================================================================
-        ゲームデータ
+        ゲームデータ ＆ キャラクタープロフィール
     ================================================================== */
     const STAGES = [
         { id: 1, bg: 'Images/stage/map01_メタバース空間.png' },
@@ -157,6 +157,81 @@
         { id: 'yellow', name: 'ドクターイエロー', img: 'Images/CW/yellow.png' },
         { id: 'srg', name: 'SRG', img: 'Images/CW/srg.png' }     
     ];
+
+    const SHINKALION_PROFILES = {
+        "500kodama": {
+            name: "５００こだまジンキフォーム",
+            soubi: "ダイナミックギガスパナ",
+            hissatsu: "—",
+            untenshi: "西大路 ヤマト"
+        },
+        "e5hayabusa": {
+            name: "Ｅ５はやぶさトレーラーフォーム",
+            soubi: "リクソウセイバー",
+            hissatsu: "グランクロス",
+            untenshi: "大成 タイセイ"
+        },
+        "e6komachi": {
+            name: "Ｅ６こまちトップリフターフォー",
+            soubi: "キンテイガン",
+            hissatsu: "ツイストロックバスター",
+            untenshi: "フォールデンアカネ"
+        },
+        "e7kagayaki": {
+            name: "Ｅ７かがやきドリルフォーム",
+            soubi: "クッサクバンパー",
+            hissatsu: "ツインクッサクドリル",
+            untenshi: "九頭竜 リョータ"
+        },
+        "e8tsubasa": {
+            name: "Ｅ８つばさドローンフォーム",
+            soubi: "ホーネットライフル",
+            hissatsu: "—",
+            untenshi: "最上 ガンマ"
+        },
+        "h5hayabusa": {
+            name: "Ｈ５はやぶさドーザーフォーム",
+            soubi: "ドーザーハイドアーム",
+            hissatsu: "—",
+            untenshi: "五稜郭 シオン"
+        },
+        "n700skamome": {
+            name: "Ｎ７００Ｓかもめフェリーフォー",
+            soubi: "サンドウカトラス",
+            hissatsu: "—",
+            untenshi: "海風 ツクモ"
+        },
+        "n700snozomi": {
+            name: "Ｎ７００Ｓのぞみブルートレーラ",
+            soubi: "リクソウブレード",
+            hissatsu: "—",
+            untenshi: "魚虎 テン"
+        },
+        "phantom": {
+            name: "ファントムシンカリオン",
+            soubi: "ファントムガントレットソード",
+            hissatsu: "—",
+            untenshi: "大成 イナ"
+        },
+        "srg": {
+            name: "シンカリオンＳＲＧ",
+            soubi: "—",
+            hissatsu: "—",
+            untenshi: "タイセイ・アカネ・リョータ"
+        },
+        "yellow": {
+            name: "グレートドクターイエロー",
+            soubi: "グレートケンソクブレード",
+            hissatsu: "—",
+            untenshi: "梔子 モリット"
+        },
+        "zero": {
+            name: "シンカリオン ０",
+            soubi: "ゼロブレード",
+            hissatsu: "—",
+            untenshi: "工部 レイジ"
+        }
+    };
 
     const NORMAL_ENEMY_IMAGES = [
         'Images/CW/敵1.png',
@@ -212,7 +287,7 @@
     }
 
     function maybeShowStageIntro() {
-        // 互換用に残置（現在はenterMapが常に演出を出すため未使用）
+        // 互換用に残置
     }
 
     /* ===================================================================
@@ -227,9 +302,6 @@
         intro.classList.add('show');
     }
 
-    // マップ画面に入る/ステージを切り替える際の共通処理。
-    // 必ずcurrentStageIdを使うことで「違うステージ番号が表示される」誤表示を防止する。
-    // 演出中はBGMを一瞬オフし、演出が終わるタイミングでそのステージのBGMを再開する。
     const STAGE_INTRO_DURATION_MS = 1000;
 
     function enterMap(showIntro) {
@@ -331,7 +403,7 @@
     }
 
     /* ===================================================================
-        メニュー / しれいしつ
+        メニュー / しれいしつ ＆ プロフィール表示更新
     ================================================================== */
     function openMenu() {
         playSfx('select');
@@ -351,30 +423,43 @@
         playSfx('select');
         document.getElementById('shireishitsu-overlay').style.display = 'none';
     }
+
+    function updateCharacterPreview(charKey) {
+        const profile = SHINKALION_PROFILES[charKey];
+        const previewImg = document.getElementById('character-preview-img');
+        const previewName = document.getElementById('character-preview-name');
+        const soubiEl = document.getElementById('profile-soubi');
+        const hissatsuEl = document.getElementById('profile-hissatsu');
+        const untenshiEl = document.getElementById('profile-untenshi');
+
+        const charDef = CHARACTERS.find(c => c.id === charKey) || CHARACTERS[0];
+
+        if (previewImg) {
+            previewImg.style.backgroundImage = "url('" + charDef.img + "')";
+        }
+
+        if (profile) {
+            if (previewName) previewName.innerText = profile.name;
+            if (soubiEl) soubiEl.innerText = profile.soubi;
+            if (hissatsuEl) hissatsuEl.innerText = profile.hissatsu;
+            if (untenshiEl) untenshiEl.innerText = profile.untenshi;
+        } else {
+            if (previewName) previewName.innerText = charDef.name;
+            if (soubiEl) soubiEl.innerText = "—";
+            if (hissatsuEl) hissatsuEl.innerText = "—";
+            if (untenshiEl) untenshiEl.innerText = "—";
+        }
+    }
+
     function renderShireishitsu() {
         const grid = document.getElementById('character-grid');
         if (!grid) return;
         grid.innerHTML = '';
-        
-        const previewImg = document.getElementById('character-preview-img');
-        const previewName = document.getElementById('character-preview-name');
-
-        // 現在選択中のキャラクター情報を取得
-        const selectedChar = CHARACTERS.find(c => c.id === progress.selectedCharacter) || CHARACTERS[0];
-        
-        // 下部の全身画像プレビューを更新
-        if (previewImg) {
-            previewImg.style.backgroundImage = "url('" + selectedChar.img + "')";
-        }
-        if (previewName) {
-            previewName.innerText = selectedChar.name;
-        }
 
         CHARACTERS.forEach(c => {
             const card = document.createElement('div');
             card.className = 'character-face-card' + (progress.selectedCharacter === c.id ? ' selected' : '');
             
-            // キャラクターファイルの後ろに _up.png を付与した顔画像パスを生成
             const faceImgPath = c.img.replace('.png', '_up.png');
 
             card.innerHTML =
@@ -389,6 +474,9 @@
             };
             grid.appendChild(card);
         });
+
+        // プレビュー情報の更新を呼び出し
+        updateCharacterPreview(progress.selectedCharacter);
     }
 
     /* ===================================================================
@@ -581,7 +669,6 @@
         const isBoss = nodeIndex === 5;
         playBgm(isBoss ? 'boss' : 'battle');
 
-        // バトル背景をステージのマップ背景とリンクさせる
         const stageDef = STAGES[currentStageId - 1];
         document.getElementById('screen-battle').style.backgroundImage = "url('" + stageDef.bg + "')";
 
@@ -618,7 +705,7 @@
     function backToMap() {
         if (isLocked) return;
         playSfx('select');
-        enterMap(false); // 同じステージに戻るだけなので演出なし
+        enterMap(false);
     }
 
     function onNodeCleared() {
@@ -661,7 +748,7 @@
             setTimeout(() => {
                 cutin.classList.remove('show');
                 if (callback) callback();
-            }, 1000); // 1秒表示
+            }, 1000);
         } else {
             if (callback) callback();
         }
