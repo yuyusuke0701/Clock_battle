@@ -267,7 +267,7 @@ body {
     overflow: hidden;
 }
 
-/* しれいかんのコメント（顔画像をさらに小さくして機体名とかぶらないように調整） */
+/* 司令官の顔サイズは元に戻す (48px) */
 #commander-intro {
     display: flex;
     align-items: center;
@@ -276,8 +276,8 @@ body {
     margin-bottom: 8px;
 }
 #commander-face {
-    width: 36px;
-    height: 36px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     background-image: url('Images/CW/kadomichi_up.png');
     background-size: cover;
@@ -339,8 +339,9 @@ body {
     box-shadow: 0 0 10px #fde047;
     background: rgba(253,224,71,0.15);
 }
+/* シンカリオンの顔画像（サムネイル）のサイズを少し縮小して機体名が隠れないように調整 */
 .character-face-thumb {
-    width: 100%;
+    width: 78%;
     aspect-ratio: 1 / 1;
     border-radius: 0;
     background-size: cover;
@@ -392,7 +393,7 @@ body {
     min-height: 0;
 }
 .preview-label {
-    display: none; /* ラベルを非表示にしてスペースを確保し、横幅いっぱい・改行なしで名目を配置しやすくする */
+    display: none;
 }
 #character-preview-name {
     font-size: 16px;
@@ -837,7 +838,6 @@ body {
     transform: translate(-50%, -50%) scale(0.6);
     background: linear-gradient(180deg, rgba(15,23,42,0.95), rgba(2,6,23,0.95));
     border: 3px solid #fde047;
-    border-router: 20px;
     border-radius: 20px;
     padding: 16px 26px;
     font-size: 22px;
