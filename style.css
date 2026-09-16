@@ -267,7 +267,7 @@ body {
     overflow: hidden;
 }
 
-/* しれいかんのコメント（顔画像を若干縮小して機体名と重ならないように調整） */
+/* しれいかんのコメント（顔画像をさらに小さくして機体名とかぶらないように調整） */
 #commander-intro {
     display: flex;
     align-items: center;
@@ -276,8 +276,8 @@ body {
     margin-bottom: 8px;
 }
 #commander-face {
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background-image: url('Images/CW/kadomichi_up.png');
     background-size: cover;
@@ -357,7 +357,7 @@ body {
     flex-shrink: 0;
 }
 
-/* 下部プレビューエリア：上下に配置し、機体を上部に・プロフィールを下部に横幅いっぱいで表示 */
+/* 下部プレビューエリア：上部3/4を機体画像、下部1/4をプロフィールに配分 */
 #character-preview-area {
     flex: 1;
     display: flex;
@@ -367,7 +367,7 @@ body {
     background: rgba(0,0,0,0.6);
     border: 2px solid #38bdf8;
     border-radius: 16px;
-    padding: 10px 14px;
+    padding: 8px 12px;
     margin-top: 8px;
     box-shadow: 0 0 20px rgba(56,189,248,0.4);
     min-height: 0;
@@ -375,31 +375,27 @@ body {
 }
 #character-preview-img {
     width: 100%;
-    height: 110px;
+    flex: 3; /* 上部3/4の割合を確保 */
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: center top;
-    flex-shrink: 0;
+    background-position: center center;
+    min-height: 0;
     margin-bottom: 4px;
 }
 #character-preview-info {
     width: 100%;
+    flex: 1; /* 下部1/4の割合を確保 */
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    flex: 1;
     min-height: 0;
 }
 .preview-label {
-    font-size: 10px;
-    color: #38bdf8;
-    font-weight: bold;
-    letter-spacing: 1px;
-    margin-bottom: 2px;
+    display: none; /* ラベルを非表示にしてスペースを確保し、横幅いっぱい・改行なしで名目を配置しやすくする */
 }
 #character-preview-name {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 900;
     color: #fff;
     white-space: nowrap;
@@ -409,7 +405,7 @@ body {
     line-height: 1.2;
 }
 
-/* ポンプアップ最下部に配置する「しゅつげき」ボタン（青系） */
+/* ポップアップ最下部に配置する「しゅつげき」ボタン（青系） */
 #sortie-btn, .back-btn {
     width: 100%;
     background: linear-gradient(135deg, #0284c7, #0369a1);
@@ -841,6 +837,7 @@ body {
     transform: translate(-50%, -50%) scale(0.6);
     background: linear-gradient(180deg, rgba(15,23,42,0.95), rgba(2,6,23,0.95));
     border: 3px solid #fde047;
+    border-router: 20px;
     border-radius: 20px;
     padding: 16px 26px;
     font-size: 22px;
