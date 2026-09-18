@@ -1,207 +1,345 @@
 /* ===================================================================
-    定数・データ定義
+    画面サイズ対応：常に固定レイアウトを拡大縮小するだけにする
 ================================================================== */
+function fitGame() {
+    const container = document.getElementById('game-container');
+    if (!container) return;
+    const scale = Math.min(window.innerWidth / 480, window.innerHeight / 800);
+    container.style.transform = 'scale(' + scale + ')';
+}
+window.addEventListener('resize', fitGame);
+window.addEventListener('orientationchange', fitGame);
+
+/* ===================================================================
+    サウンド関連
+================================================================== */
+let soundOn = true;
+
+const STAGE_BGMS = {
+    1: new Audio(encodeURI('Sounds/オープニングオーケストラ「夜明け」.mp3')),
+    2: new Audio(encodeURI('Sounds/雲海.mp3')),
+    3: new Audio(encodeURI('Sounds/遠い空へ.mp3')),
+    4: new Audio(encodeURI('Sounds/試練の道.mp3')),
+    5: new Audio(encodeURI('Sounds/秘境の地.mp3')),
+    6: new Audio(encodeURI('Sounds/ブラックファクトリー.mp3'))
+};
+
+const battleBgm = new Audio(encodeURI('Sounds/炎乱.mp3'));
+const bossBgm = new Audio(encodeURI('Sounds/Battle_in_the_Moonlight.mp3'));
+
+for (const key in STAGE_BGMS) {
+    STAGE_BGMS[key].loop = true;
+    STAGE_BGMS[key].volume = 0.35;
+}
+battleBgm.loop = true;
+battleBgm.volume = 0.35;
+bossBgm.loop = true;
+bossBgm.volume = 0.35;
+
+const sfx = {
+    select: new Audio(encodeURI('Sounds/セレクト音風な効果音.mp3')),
+    decide: new Audio(encodeURI('Sounds/システム決定音_9.mp3')),
+    correct: new Audio(encodeURI('Sounds/ゲームクリアー！.mp3')),
+    wrong: new Audio(encodeURI('Sounds/爆破・爆発音.mp3')),
+    hit: new Audio(encodeURI('Sounds/打撃音.mp3')),
+    critical: new Audio(encodeURI('Sounds/レーザー攻撃.mp3'))
+};
+const sfxDefaultVolume = { select: 0.7, decide: 0.7, correct: 0.7, wrong: 0.7, hit: 0.7, critical: 0.8 };
+for (const key in sfx) {
+    sfx[key].volume = sfxDefaultVolume[key] ?? 0.7;
+}
+
+const sfxTimers = {};
+const sfxFadeIntervals = {};
+
+function playSfx(name) {
+    if (!soundOn) return;
+    const base = sfx[name];
+    if (!base) return;
+
+    if (sfxTimers[name]) { clearTimeout(sfxTimers[name]); sfxTimers[name] = null; }
+    if (sfxFadeIntervals[name]) { clearInterval(sfxFadeIntervals[name]); sfxFadeIntervals[name] = null; }
+
+    base.currentTime = 0;
+    base.volume = sfxDefaultVolume[name] ?? 0.7;
+    base.play().catch(() => {});
+
+    const fadeStartMs = 4000;
+    const fadeDurationMs = 1000;
+    const fadeSteps = 20;
+    const stepTime = fadeDurationMs / fadeSteps;
+
+    sfxTimers[name] = setTimeout(() => {
+        let step = 0;
+        const startVolume = base.volume;
+        sfxFadeIntervals[name] = setInterval(() => {
+            step++;
+            base.volume = Math.max(0, startVolume * (1 - step / fadeSteps));
+            if (step >= fadeSteps) {
+                clearInterval(sfxFadeIntervals[name]);
+                sfxFadeIntervals[name] = null;
+                base.pause();
+                base.currentTime = 0;
+                base.volume = sfxDefaultVolume[name] ?? 0.7;
+            }
+        }, stepTime);
+    }, fadeStartMs);
+}
+
+function stopAllBgm() {
+    for (const key in STAGE_BGMS) {
+        STAGE_BGMS[key].pause();
+    }
+    battleBgm.pause();
+    bossBgm.pause();
+}
+
+function playBgm(type, stageId) {
+    if (!soundOn) return;
+    stopAllBgm();
+
+    if (type === 'map') {
+        const bgm = STAGE_BGMS[stageId] || STAGE_BGMS[1];
+        bgm.play().catch(() => {});
+    } else if (type === 'battle') {
+        battleBgm.play().catch(() => {});
+    } else if (type === 'boss') {
+        bossBgm.play().catch(() => {});
+    }
+}
+
+function toggleSound() {
+    soundOn = !soundOn;
+    const btn = document.getElementById('sound-toggle');
+    if (btn) btn.innerText = soundOn ? '🔊' : '🔇';
+    if (!soundOn) {
+        stopAllBgm();
+    } else {
+        if (currentScreen === 'map') playBgm('map', currentStageId);
+        if (currentScreen === 'battle') {
+            const isBoss = pendingNodeIndex === 5;
+            playBgm(isBoss ? 'boss' : 'battle');
+        }
+    }
+}
+
+/* ===================================================================
+    ゲームデータ ＆ キャラクタープロフィール
+================================================================== */
+const STAGES = [
+    { id: 1, bg: 'Images/stage/map01_メタバース空間.png' },
+    { id: 2, bg: 'Images/stage/map02_森.png' },
+    { id: 3, bg: 'Images/stage/map03_街.png' },
+    { id: 4, bg: 'Images/stage/map04_車両基地.png' },
+    { id: 5, bg: 'Images/stage/map05_月.png' },
+    { id: 6, bg: 'Images/stage/map06_アジト.png' }
+];
+
+const NODE_POSITIONS = [
+    { x: 18, y: 72 },
+    { x: 32, y: 42 },
+    { x: 50, y: 68 },
+    { x: 68, y: 40 },
+    { x: 82, y: 65 },
+    { x: 50, y: 18 } // ボス
+];
+
 const CHARACTERS = [
-    { id: 'e5hayabusa', name: 'E5はやぶさ', img: 'Images/CW/e5hayabusa.png' },
-    { id: 'e6komachi', name: 'E6こまち', img: 'Images/CW/e6komachi.png' },
-    { id: 'e7kagayaki', name: 'E7かがやき', img: 'Images/CW/e7kagayaki.png' },
-    { id: 'h5hayabusa', name: 'H5はやぶさ', img: 'Images/CW/h5hayabusa.png' },
-    { id: '800tsubame', name: '800つばめ', img: 'Images/CW/800tsubame.png' },
-    { id: 'n700s', name: 'N700Sのぞみ', img: 'Images/CW/n700s.png' },
-    { id: '500kodama', name: '500こだま', img: 'Images/CW/500kodama.png' },
-    { id: 'h5alphax', name: 'E8つばさ', img: 'Images/CW/e8tsubasa.png' }
+    { id: 'e5hayabusa', name: 'E5 はやぶさ', img: 'Images/CW/e5hayabusa.png' },
+    { id: 'e6komachi', name: 'E6 こまち', img: 'Images/CW/e6komachi.png' },
+    { id: 'e7kagayaki', name: 'E7 かがやき', img: 'Images/CW/e7kagayaki.png' },
+    { id: 'e8tsubasa', name: 'E8 つばさ', img: 'Images/CW/e8tsubasa.png' },
+    { id: 'h5hayabusa', name: 'H5 はやぶさ', img: 'Images/CW/h5hayabusa.png' },
+    { id: 'n700skamome', name: 'N700S かもめ', img: 'Images/CW/n700skamome.png' },
+    { id: 'n700snozomi', name: 'N700S のぞみ', img: 'Images/CW/n700snozomi.png' },
+    { id: 'yellow', name: 'ドクターイエロー', img: 'Images/CW/yellow.png' },
+    { id: 'srg', name: 'SRG', img: 'Images/CW/srg.png' }     
 ];
 
 const SHINKALION_PROFILES = {
-    'e5hayabusa': { name: 'E5はやぶさトレーラーフォーム', soubi: 'リクソウセイバー', hissatsu: 'グランクロス', untenshi: '大成タイセイ' },
-    'e6komachi': { name: 'E6こまち', soubi: 'フミキリガン', hissatsu: 'ガリウムシュート', untenshi: 'フォールツバサ' },
-    'e7kagayaki': { name: 'E7かがやき', soubi: 'シャリレンソード', hissatsu: 'オオマエザキ砲', untenshi: '九頭竜リョータ' },
-    'h5hayabusa': { name: 'H5はやぶさ', soubi: 'カイキョウソード', hissatsu: 'グランクロス', untenshi: '北海道の運転士' },
-    '800tsubame': { name: '800つばめ', soubi: 'パンタグラフアロー', hissatsu: '九州ブラスト', untenshi: '大成イナ' },
-    'n700s': { name: 'N700Sのぞみ', soubi: 'JRクナイ', hissatsu: 'アドバンスブレード', untenshi: '青梅キリン' },
-    '500kodama': { name: '500こだま', soubi: 'シンカウエポン', hissatsu: 'ソニックウェーブ', untenshi: '速杉ハヤト' },
-    'h5alphax': { name: 'E8つばさ', soubi: 'テツノコブシ', hissatsu: 'ウイングブーメラン', untenshi: '月山シノブ' }
+    "500kodama": { name: "５００こだまジンキフォーム", soubi: "ダイナミックギガスパナ", hissatsu: "—", untenshi: "西大路 ヤマト" },
+    "e5hayabusa": { name: "Ｅ５はやぶさトレーラーフォーム", soubi: "リクソウセイバー", hissatsu: "グランクロス", untenshi: "大成 タイセイ" },
+    "e6komachi": { name: "Ｅ６こまちトップリフターフォー", soubi: "キンテイガン", hissatsu: "ツイストロックバスター", untenshi: "フォールデンアカネ" },
+    "e7kagayaki": { name: "Ｅ７かがやきドリルフォーム", soubi: "クッサクバンパー", hissatsu: "ツインクッサクドリル", untenshi: "九頭竜 リョータ" },
+    "e8tsubasa": { name: "Ｅ８つばさドローンフォーム", soubi: "ホーネットライフル", hissatsu: "—", untenshi: "最上 ガンマ" },
+    "h5hayabusa": { name: "Ｈ５はやぶさドーザーフォーム", soubi: "ドーザーハイドアーム", hissatsu: "—", untenshi: "五稜郭 シオン" },
+    "n700skamome": { name: "Ｎ７００Ｓかもめフェリーフォー", soubi: "サンドウカトラス", hissatsu: "—", untenshi: "海風 ツクモ" },
+    "n700snozomi": { name: "Ｎ７００Ｓのぞみブルートレーラ", soubi: "リクソウブレード", hissatsu: "—", untenshi: "魚虎 テン" },
+    "phantom": { name: "ファントムシンカリオン", soubi: "ファントムガントレットソード", hissatsu: "—", untenshi: "大成 イナ" },
+    "srg": { name: "シンカリオンＳＲＧ", soubi: "—", hissatsu: "—", untenshi: "タイセイ・アカネ・リョータ" },
+    "yellow": { name: "グレートドクターイエロー", soubi: "グレートケンソクブレード", hissatsu: "—", untenshi: "梔子 モリット" },
+    "zero": { name: "シンカリオン ０", soubi: "ゼロブレード", hissatsu: "—", untenshi: "工部 レイジ" }
 };
 
-const STAGES = [
-    { id: 1, name: "ステージ 1", bg: "Images/CW/bg_stage1.jpg" },
-    { id: 2, name: "ステージ 2", bg: "Images/CW/bg_stage2.jpg" },
-    { id: 3, name: "ステージ 3", bg: "Images/CW/bg_stage3.jpg" },
-    { id: 4, name: "ステージ 4", bg: "Images/CW/bg_stage4.jpg" },
-    { id: 5, name: "ステージ 5", bg: "Images/CW/bg_stage5.jpg" }
+const NORMAL_ENEMY_IMAGES = [
+    'Images/CW/敵1.png',
+    'Images/CW/敵2.png',
+    'Images/CW/敵3.png',
+    'Images/CW/敵4.png'
 ];
 
-const STAGE_1_5_ENEMIES = [
-    'Images/CW/enemy1.png',
-    'Images/CW/enemy2.png'
-];
-const STAGE_6_10_ENEMIES = [
-    'Images/CW/enemy1.png',
-    'Images/CW/enemy2.png'
-];
+const SAVE_KEY = 'shinkalion_clock_master_save_v1';
 
-const PLAYER_MAX_HP = 100;
-const ENEMY_MAX_HP = 100;
+function loadProgress() {
+    try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return {
+        unlockedStage: 1,
+        stageProgress: {},
+        selectedCharacter: 'e5hayabusa',
+        visitedStages: {}
+    };
+}
+function saveProgress() {
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(progress)); } catch (e) {}
+}
+function getStageClears(stageId) {
+    if (!progress.stageProgress[stageId]) {
+        progress.stageProgress[stageId] = [false, false, false, false, false, false];
+    }
+    return progress.stageProgress[stageId];
+}
 
-let playerHP = PLAYER_MAX_HP;
-let enemyHP = ENEMY_MAX_HP;
-let enemyMaxHp = ENEMY_MAX_HP;
-
-let currentStageId = 1;
-let pendingNodeIndex = 0;
-let clearedNodesInStage = [];
-let isLocked = false;
-
-let progress = {
-    unlockedStage: 1,
-    clearedStages: [],
-    selectedCharacter: 'e5hayabusa',
-    completedNodes: {}
-};
-
-let audioMuted = false;
+let progress = loadProgress();
+if (!progress.visitedStages) progress.visitedStages = {};
+let currentScreen = 'top';
+let currentStageId = progress.unlockedStage;
+let pendingNodeIndex = null;
 
 /* ===================================================================
-    初期化・画面切り替え
+    画面切り替え
 ================================================================== */
-window.addEventListener('DOMContentLoaded', () => {
-    loadProgress();
-    setupSoundToggle();
-});
+function showScreen(name) {
+    const sTop = document.getElementById('screen-top');
+    const sMap = document.getElementById('screen-map');
+    const sBattle = document.getElementById('screen-battle');
+    const mBtn = document.getElementById('menu-btn');
 
-function showScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(el => el.style.display = 'none');
-    const target = document.getElementById('screen-' + screenId);
-    if (target) target.style.display = 'block';
+    if (sTop) sTop.style.display = name === 'top' ? 'flex' : 'none';
+    if (sMap) sMap.style.display = name === 'map' ? 'block' : 'none';
+    if (sBattle) sBattle.style.display = name === 'battle' ? 'block' : 'none';
+    if (mBtn) mBtn.style.display = name === 'map' ? 'block' : 'none';
+    currentScreen = name;
 }
 
 function startGame() {
     playSfx('decide');
-    openMapScreen();
-}
-
-function setupSoundToggle() {
-    const btn = document.getElementById('sound-toggle');
-    if (btn) {
-        btn.onclick = () => {
-            audioMuted = !audioMuted;
-            btn.innerText = audioMuted ? '🎵 OFF' : '🎵 ON';
-        };
-    }
-}
-
-function playSfx(type) {
-    if (audioMuted) return;
-    // 効果音再生処理（必要に応じて追加）
-}
-
-function playBgm(type) {
-    if (audioMuted) return;
-    // BGM再生処理（必要に応じて追加）
+    enterMap(true);
 }
 
 /* ===================================================================
-    マップ画面 ＆ ノード生成
+    マップ画面
 ================================================================== */
-function openMapScreen() {
+function playStageIntro(stageId) {
+    const intro = document.getElementById('stage-intro');
+    const text = document.getElementById('stage-intro-text');
+    if (!intro || !text) return;
+    text.innerText = 'ステージ ' + stageId;
+    intro.classList.remove('show');
+    void intro.offsetWidth;
+    intro.classList.add('show');
+}
+
+const STAGE_INTRO_DURATION_MS = 1000;
+
+function enterMap(showIntro) {
     showScreen('map');
-    playBgm('map');
-    updateStageNav();
-    renderMapNodes();
-}
+    renderMap();
 
-function updateStageNav() {
-    const textEl = document.getElementById('stage-nav-text');
-    if (textEl) textEl.innerText = STAGES[currentStageId - 1].name;
-
-    const prevBtn = document.getElementById('prev-stage-btn');
-    const nextBtn = document.getElementById('next-stage-btn');
-    if (prevBtn) prevBtn.classList.toggle('disabled', currentStageId <= 1);
-    if (nextBtn) nextBtn.classList.toggle('disabled', currentStageId >= progress.unlockedStage || currentStageId >= STAGES.length);
-
-    const screenMap = document.getElementById('screen-map');
-    if (screenMap) {
-        screenMap.style.backgroundImage = "url('" + STAGES[currentStageId - 1].bg + "')";
+    if (showIntro) {
+        stopAllBgm();
+        playStageIntro(currentStageId);
+        clearTimeout(enterMap._bgmTimer);
+        enterMap._bgmTimer = setTimeout(() => {
+            playBgm('map', currentStageId);
+        }, STAGE_INTRO_DURATION_MS);
+    } else {
+        playBgm('map', currentStageId);
     }
+
+    progress.visitedStages[currentStageId] = true;
+    saveProgress();
 }
 
-function changeStage(delta) {
-    playSfx('select');
-    const newId = currentStageId + delta;
-    if (newId >= 1 && newId <= progress.unlockedStage && newId <= STAGES.length) {
-        currentStageId = newId;
-        clearedNodesInStage = progress.completedNodes[currentStageId] || [];
-        updateStageNav();
-        renderMapNodes();
+function showMapToast(text) {
+    const t = document.getElementById('map-toast');
+    if (!t) return;
+    t.innerText = text;
+    t.style.display = 'block';
+    clearTimeout(t._hideTimer);
+    t._hideTimer = setTimeout(() => { t.style.display = 'none'; }, 1800);
+}
+
+function renderMap() {
+    const stage = STAGES[currentStageId - 1];
+    const mapScreen = document.getElementById('screen-map');
+    if (mapScreen && stage) {
+        mapScreen.style.backgroundImage = "url('" + stage.bg + "')";
     }
-}
+    
+    const navLabel = document.getElementById('stage-nav-label');
+    if (navLabel) navLabel.innerText = 'ステージ ' + currentStageId;
 
-function renderMapNodes() {
+    const prevArr = document.getElementById('prev-arrow');
+    const nextArr = document.getElementById('next-arrow');
+    if (prevArr) prevArr.classList.toggle('disabled', currentStageId <= 1);
+    if (nextArr) nextArr.classList.toggle('disabled', currentStageId >= progress.unlockedStage);
+
+    const clears = getStageClears(currentStageId);
     const container = document.getElementById('map-nodes');
     if (!container) return;
     container.innerHTML = '';
 
-    clearedNodesInStage = progress.completedNodes[currentStageId] || [];
+    for (let i = 0; i < 6; i++) {
+        const pos = NODE_POSITIONS[i];
+        const isBoss = i === 5;
+        const isCleared = clears[i];
+        const bossLocked = isBoss && !clears.slice(0, 5).every(Boolean);
 
-    // ステップごとの座標配置（ステージマップ上の位置）
-    const nodeCoords = [
-        { x: 50, y: 78 }, // 0
-        { x: 30, y: 64 }, // 1
-        { x: 70, y: 50 }, // 2
-        { x: 35, y: 36 }, // 3
-        { x: 65, y: 22 }, // 4
-        { x: 50, y: 10 }  // 5 (ボス)
-    ];
-
-    nodeCoords.forEach((coord, index) => {
-        const marker = document.createElement('div');
-        const isBoss = (index === 5);
-        const isCleared = clearedNodesInStage.includes(index);
-        
-        // 前のノードがクリアされているか、最初のノード、またはボス手前までクリア済みなら解放
-        const isUnlocked = (index === 0) || clearedNodesInStage.includes(index - 1) || isCleared;
-
-        let className = 'node-marker';
-        if (isBoss) className += ' boss';
-        if (isCleared) className += ' cleared';
-        if (!isUnlocked) className += ' locked';
-
-        marker.className = className;
-        marker.style.left = coord.x + '%';
-        marker.style.top = coord.y + '%';
-        marker.innerText = isBoss ? 'BOSS' : (index + 1);
-
-        marker.onclick = () => {
-            if (!isUnlocked) {
-                playSfx('wrong');
-                showMapToast('前のバトルポイントをクリアしてください！');
-                return;
-            }
-            playSfx('select');
-            pendingNodeIndex = index;
-            openNodePopup(index);
-        };
-
-        container.appendChild(marker);
-    });
-}
-
-function showMapToast(msg) {
-    const toast = document.getElementById('map-toast');
-    if (!toast) return;
-    toast.innerText = msg;
-    toast.style.display = 'block';
-    setTimeout(() => {
-        toast.style.display = 'none';
-    }, 2000);
-}
-function openNodePopup(index) {
-    const popup = document.getElementById('node-popup');
-    const title = document.getElementById('node-popup-title');
-    if (title) {
-        title.innerText = index === 5 ? ('ステージ ' + currentStageId + ' ボス') : ('バトルポイント ' + (index + 1));
+        const btn = document.createElement('div');
+        btn.className = 'node-marker'
+            + (isBoss ? ' boss' : '')
+            + (isCleared ? ' cleared' : '')
+            + (bossLocked ? ' locked' : '');
+        btn.style.left = pos.x + '%';
+        btn.style.top = pos.y + '%';
+        btn.innerText = isBoss ? (isCleared ? '✓' : '★') : (isCleared ? '✓' : String(i + 1));
+        btn.onclick = () => selectNode(i);
+        container.appendChild(btn);
     }
-    if (popup) popup.style.display = 'flex';
+}
+
+function prevStage() {
+    if (currentStageId <= 1) return;
+    playSfx('select');
+    currentStageId--;
+    enterMap(true);
+}
+function nextStage() {
+    if (currentStageId >= progress.unlockedStage) return;
+    playSfx('select');
+    currentStageId++;
+    enterMap(true);
+}
+
+function selectNode(i) {
+    const clears = getStageClears(currentStageId);
+    const bossLocked = i === 5 && !clears.slice(0, 5).every(Boolean);
+    playSfx('select');
+
+    if (bossLocked) {
+        showMapToast('ボスへの挑戦には バトルポイントを ぜんぶ クリアしてね！');
+        return;
+    }
+
+    pendingNodeIndex = i;
+    const title = i === 5 ? 'ステージボス' : ('バトルポイント ' + (i + 1));
+    const titleEl = document.getElementById('node-popup-title');
+    const popupEl = document.getElementById('node-popup');
+    if (titleEl) titleEl.innerText = title + (clears[i] ? '（クリアずみ）' : '');
+    if (popupEl) popupEl.style.display = 'flex';
 }
 
 function closeNodePopup() {
@@ -211,122 +349,317 @@ function closeNodePopup() {
 }
 
 function confirmBattleStart() {
-    closeNodePopup();
+    playSfx('decide');
+    const popup = document.getElementById('node-popup');
+    if (popup) popup.style.display = 'none';
     startBattle(pendingNodeIndex);
 }
-
 /* ===================================================================
-    メニュー ＆ しれいしつ
+    メニュー / しれいしつ ＆ プロフィール表示更新
 ================================================================== */
 function openMenu() {
     playSfx('select');
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'flex';
 }
-
 function closeMenu() {
     playSfx('select');
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
 }
-
 function openShireishitsu() {
-    closeMenu();
+    playSfx('decide');
+    const menu = document.getElementById('menu-overlay');
+    const shiri = document.getElementById('shireishitsu-overlay');
+    if (menu) menu.style.display = 'none';
+    renderShireishitsu();
+    if (shiri) shiri.style.display = 'flex';
+}
+function closeShireishitsu() {
     playSfx('select');
     const shiri = document.getElementById('shireishitsu-overlay');
-    if (shiri) shiri.style.display = 'flex';
-    initShireishitsu();
+    if (shiri) shiri.style.display = 'none';
 }
 
-function initShireishitsu() {
+function updateCharacterPreview(charKey) {
+    const profile = SHINKALION_PROFILES[charKey];
+    const previewImg = document.getElementById('character-preview-img');
+    const previewName = document.getElementById('character-preview-name');
+    const soubiEl = document.getElementById('profile-soubi');
+    const hissatsuEl = document.getElementById('profile-hissatsu');
+    const untenshiEl = document.getElementById('profile-untenshi');
+
+    const charDef = CHARACTERS.find(c => c.id === charKey) || CHARACTERS[0];
+
+    if (previewImg) {
+        previewImg.style.backgroundImage = "url('" + charDef.img + "')";
+    }
+
+    if (profile) {
+        if (previewName) previewName.innerText = profile.name;
+        if (soubiEl) soubiEl.innerText = profile.soubi;
+        if (hissatsuEl) hissatsuEl.innerText = profile.hissatsu;
+        if (untenshiEl) untenshiEl.innerText = profile.untenshi;
+    } else {
+        if (previewName) previewName.innerText = charDef.name;
+        if (soubiEl) soubiEl.innerText = "—";
+        if (hissatsuEl) hissatsuEl.innerText = "—";
+        if (untenshiEl) untenshiEl.innerText = "—";
+    }
+}
+
+function renderShireishitsu() {
     const grid = document.getElementById('character-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
-    CHARACTERS.forEach(ch => {
-        // CSSのクラス構造に合わせて card / thumb / name を生成
-        const item = document.createElement('button');
-        item.className = 'character-face-card' + (progress.selectedCharacter === ch.id ? ' selected' : '');
+    CHARACTERS.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'character-face-card' + (progress.selectedCharacter === c.id ? ' selected' : '');
         
-        const thumb = document.createElement('div');
-        thumb.className = 'character-face-thumb';
-        thumb.style.backgroundImage = "url('" + ch.img + "')";
-        
-        const nameEl = document.createElement('div');
-        nameEl.className = 'character-face-name';
-        nameEl.innerText = ch.name;
+        card.innerHTML =
+            '<div class="character-face-thumb" style="background-image:url(\'' + c.img + '\')"></div>' +
+            '<div class="character-face-name">' + c.name + '</div>';
 
-        item.appendChild(thumb);
-        item.appendChild(nameEl);
-
-        item.onclick = () => {
+        card.onclick = () => {
             playSfx('select');
-            progress.selectedCharacter = ch.id;
+            progress.selectedCharacter = c.id;
             saveProgress();
-            document.querySelectorAll('.character-face-card').forEach(el => el.classList.remove('selected'));
-            item.classList.add('selected');
-            updateCharacterPreview(ch.id);
+            renderShireishitsu();
         };
-        grid.appendChild(item);
+        grid.appendChild(card);
     });
 
     updateCharacterPreview(progress.selectedCharacter);
 }
 
-function updateCharacterPreview(chId) {
-    const ch = CHARACTERS.find(c => c.id === chId) || CHARACTERS[0];
-    const profile = SHINKALION_PROFILES[ch.id] || { name: ch.name, soubi: "—", hissatsu: "—", untenshi: "—" };
-
-    const imgEl = document.getElementById('character-preview-img');
-    const nameEl = document.getElementById('character-preview-name');
-    const soubiEl = document.getElementById('profile-soubi');
-    const hissatsuEl = document.getElementById('profile-hissatsu');
-    const untenshiEl = document.getElementById('profile-untenshi');
-
-    if (imgEl) imgEl.style.backgroundImage = "url('" + ch.img + "')";
-    if (nameEl) nameEl.innerText = profile.name;
-    if (soubiEl) soubiEl.innerText = profile.soubi;
-    if (hissatsuEl) hissatsuEl.innerText = profile.hissatsu;
-    if (untenshiEl) untenshiEl.innerText = profile.untenshi;
-}
-
-function closeShireishitsu() {
-    playSfx('decide');
-    const shiri = document.getElementById('shireishitsu-overlay');
-    if (shiri) shiri.style.display = 'none';
-}
-
-function backToMap() {
-    playSfx('select');
-    openMapScreen();
-}
-
 /* ===================================================================
-    バトル画面 ＆ クイズ・時計処理
+    バトル画面 ＆ クリティカル機能
 ================================================================== */
+let currentHour = 3;
+let currentMinute = 0;
+let targetHour = 3;
+let targetMinute = 0;
+let score = 0;
+let isLocked = false;
+
+const PLAYER_MAX_HP = 3;
+const ENEMY_MAX_HP = 5;
+let playerHP = PLAYER_MAX_HP;
+let enemyHP = ENEMY_MAX_HP;
+let enemyMaxHp = ENEMY_MAX_HP;
+
+let criticalTimer = null;
+let timeLeft = 10;
+const MAX_TIME = 10;
+
+function startCriticalTimer() {
+    clearInterval(criticalTimer);
+    timeLeft = MAX_TIME;
+
+    const bar = document.getElementById('critical-timer-bar');
+    if (bar) {
+        bar.style.transition = 'none';
+        bar.style.transform = 'scaleX(1)';
+    }
+
+    setTimeout(() => {
+        if (bar) {
+            bar.style.transition = 'transform ' + MAX_TIME + 's linear';
+            bar.style.transform = 'scaleX(0)';
+        }
+    }, 50);
+
+    const startTime = Date.now();
+    criticalTimer = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        timeLeft = Math.max(0, MAX_TIME - elapsed);
+        
+        if (timeLeft <= 0) {
+            clearInterval(criticalTimer);
+        }
+    }, 100);
+}
+
+function renderHP() {
+    const playerBar = document.getElementById('player-hp');
+    const enemyBar = document.getElementById('enemy-hp');
+
+    if (playerBar) {
+        playerBar.innerHTML = '';
+        for (let i = 0; i < PLAYER_MAX_HP; i++) {
+            const seg = document.createElement('div');
+            seg.className = 'hp-seg player ' + (i < playerHP ? 'filled' : 'empty');
+            playerBar.appendChild(seg);
+        }
+    }
+
+    if (enemyBar) {
+        enemyBar.innerHTML = '';
+        for (let i = 0; i < enemyMaxHp; i++) {
+            const seg = document.createElement('div');
+            seg.className = 'hp-seg enemy ' + (i < enemyHP ? 'filled' : 'empty');
+            enemyBar.appendChild(seg);
+        }
+    }
+}
+
+function flashHit(elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.classList.add('hit-flash');
+    setTimeout(() => el.classList.remove('hit-flash'), 300);
+}
+
+function shakeElement(elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.classList.remove('shake');
+    void el.offsetWidth;
+    el.classList.add('shake');
+}
+
+function attackLunge(elementId, offsetPx) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.style.transform = 'translateX(' + offsetPx + 'px)';
+    setTimeout(() => {
+        el.style.transform = 'translateX(0)';
+    }, 150);
+}
+
+function showMessage(text, duration) {
+    const msg = document.getElementById('message-overlay');
+    if (!msg) return;
+    msg.innerText = text;
+    msg.classList.remove('show');
+    void msg.offsetWidth;
+    msg.classList.add('show');
+    clearTimeout(msg._hideTimer);
+    msg._hideTimer = setTimeout(() => {
+        msg.classList.remove('show');
+    }, duration);
+}
+
+function drawClockHands(hour, minute) {
+    const canvas = document.getElementById('handCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const cx = 165;
+    const cy = 165;
+    const scale = 1.5;
+
+    ctx.clearRect(0, 0, 330, 330);
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    const hourAngle = ((hour % 12 + minute / 60) / 12) * 2 * Math.PI - Math.PI / 2;
+    ctx.rotate(hourAngle);
+    ctx.beginPath();
+    ctx.moveTo(-6 * scale, -6 * scale);
+    ctx.lineTo(50 * scale, -6 * scale);
+    ctx.lineTo(60 * scale, 0);
+    ctx.lineTo(50 * scale, 6 * scale);
+    ctx.lineTo(-6 * scale, 6 * scale);
+    ctx.closePath();
+    ctx.fillStyle = '#0284c7';
+    ctx.fill();
+    ctx.lineWidth = 1.5 * scale;
+    ctx.strokeStyle = '#000';
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    const minAngle = (minute / 60) * 2 * Math.PI - Math.PI / 2;
+    ctx.rotate(minAngle);
+    ctx.beginPath();
+    ctx.moveTo(-5 * scale, -5 * scale);
+    ctx.lineTo(70 * scale, -5 * scale);
+    ctx.lineTo(80 * scale, 0);
+    ctx.lineTo(70 * scale, 5 * scale);
+    ctx.lineTo(-5 * scale, 5 * scale);
+    ctx.closePath();
+    ctx.fillStyle = '#ef4444';
+    ctx.fill();
+    ctx.lineWidth = 1.5 * scale;
+    ctx.strokeStyle = '#000';
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5 * scale, 0, 2 * Math.PI);
+    ctx.fillStyle = '#000';
+    ctx.fill();
+}
+
+function generateQuestion() {
+    targetHour = Math.floor(Math.random() * 12) + 1;
+    targetMinute = Math.random() < 0.5 ? 0 : 30;
+    drawClockHands(targetHour, targetMinute);
+    startCriticalTimer();
+}
+
+function changeHour(delta) {
+    if (isLocked) return;
+    playSfx('select');
+    currentHour += delta;
+    if (currentHour > 12) currentHour = 1;
+    if (currentHour < 1) currentHour = 12;
+    const hDisp = document.getElementById('hour-display');
+    if (hDisp) hDisp.innerText = String(currentHour).padStart(2, '0');
+}
+
+function changeMinute() {
+    if (isLocked) return;
+    playSfx('select');
+    currentMinute = currentMinute === 0 ? 30 : 0;
+    const mDisp = document.getElementById('minute-display');
+    if (mDisp) mDisp.innerText = String(currentMinute).padStart(2, '0');
+}
+
+function checkAnswer() {
+    if (isLocked) return;
+    playSfx('decide');
+
+    if (currentHour === targetHour && currentMinute === targetMinute) {
+        handleCorrect();
+    } else {
+        handleWrong();
+    }
+}
+
 function startBattle(nodeIndex) {
     showScreen('battle');
     const isBoss = nodeIndex === 5;
     playBgm(isBoss ? 'boss' : 'battle');
 
     const stageDef = STAGES[currentStageId - 1];
-    document.getElementById('screen-battle').style.backgroundImage = "url('" + stageDef.bg + "')";
+    const battleScreen = document.getElementById('screen-battle');
+    if (battleScreen && stageDef) {
+        battleScreen.style.backgroundImage = "url('" + stageDef.bg + "')";
+    }
 
     const playerEl = document.getElementById('player');
     const enemyEl = document.getElementById('enemy');
 
-    playerEl.style.transform = 'none';
-    const charDef = CHARACTERS.find(c => c.id === progress.selectedCharacter) || CHARACTERS[0];
-    playerEl.style.backgroundImage = "url('" + charDef.img + "')";
-
-    if (isBoss) {
-        enemyEl.style.backgroundImage = "url('Images/CW/hades.png')";
-    } else {
-        let pool = (currentStageId <= 5) ? STAGE_1_5_ENEMIES : STAGE_6_10_ENEMIES;
-        const randomEnemy = pool[Math.floor(Math.random() * pool.length)];
-        enemyEl.style.backgroundImage = "url('" + randomEnemy + "')";
+    if (playerEl) {
+        playerEl.classList.remove('shake', 'hit-flash');
+        playerEl.style.transform = 'none';
+        const charDef = CHARACTERS.find(c => c.id === progress.selectedCharacter) || CHARACTERS[0];
+        playerEl.style.backgroundImage = "url('" + charDef.img + "')";
     }
-    enemyEl.style.display = 'block';
+
+    if (enemyEl) {
+        enemyEl.classList.remove('shake', 'hit-flash');
+        if (isBoss) {
+            enemyEl.style.backgroundImage = "url('Images/CW/hades.png')";
+        } else {
+            const randomEnemy = NORMAL_ENEMY_IMAGES[Math.floor(Math.random() * NORMAL_ENEMY_IMAGES.length)];
+            enemyEl.style.backgroundImage = "url('" + randomEnemy + "')";
+        }
+        enemyEl.style.display = 'block';
+    }
 
     enemyMaxHp = isBoss ? ENEMY_MAX_HP + 3 : ENEMY_MAX_HP;
     playerHP = PLAYER_MAX_HP;
@@ -342,196 +675,149 @@ function startBattle(nodeIndex) {
     generateQuestion();
 }
 
-function renderHP() {
-    const pBar = document.getElementById('player-hp');
-    const eBar = document.getElementById('enemy-hp');
-    if (pBar) pBar.style.width = Math.max(0, (playerHP / PLAYER_MAX_HP) * 100) + '%';
-    if (eBar) eBar.style.width = Math.max(0, (enemyHP / enemyMaxHp) * 100) + '%';
-}
-
-let targetHour = 3;
-let targetMinute = 0;
-let currentHour = 3;
-let currentMinute = 0;
-
-function generateQuestion() {
-    targetHour = Math.floor(Math.random() * 12) + 1;
-    targetMinute = Math.floor(Math.random() * 12) * 5;
-
-    currentHour = (targetHour + Math.floor(Math.random() * 3) - 1 + 12) % 12 || 12;
-    currentMinute = (targetMinute + (Math.floor(Math.random() * 4) - 2) * 5 + 60) % 60;
-
-    updateClockDisplay();
-}
-
-function changeHour(delta) {
-    playSfx('select');
-    currentHour = ((currentHour - 1 + delta + 12) % 12) + 1;
-    updateClockDisplay();
-}
-
-function changeMinute() {
-    playSfx('select');
-    currentMinute = (currentMinute + 5) % 60;
-    updateClockDisplay();
-}
-
-function updateClockDisplay() {
-    const hDisp = document.getElementById('hour-display');
-    const mDisp = document.getElementById('minute-display');
-    if (hDisp) hDisp.innerText = String(currentHour).padStart(2, '0');
-    if (mDisp) mDisp.innerText = String(currentMinute).padStart(2, '0');
-
-    drawClockHands(currentHour, currentMinute);
-}
-
-function drawClockHands(hour, minute) {
-    const canvas = document.getElementById('handCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-
-    const minuteAngle = (minute / 60) * 2 * Math.PI - Math.PI / 2;
-    ctx.beginPath();
-    ctx.lineWidth = 6;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#333';
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + Math.cos(minuteAngle) * 110, cy + Math.sin(minuteAngle) * 110);
-    ctx.stroke();
-
-    const hourAngle = ((hour % 12) / 12) * 2 * Math.PI + (minute / 60) * (2 * Math.PI / 12) - Math.PI / 2;
-    ctx.beginPath();
-    ctx.lineWidth = 8;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#111';
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + Math.cos(hourAngle) * 75, cy + Math.sin(hourAngle) * 75);
-    ctx.stroke();
-}
-
-function checkAnswer() {
+function backToMap() {
     if (isLocked) return;
-    isLocked = true;
+    playSfx('select');
+    enterMap(false);
+}
 
-    const isCorrect = (currentHour === targetHour && currentMinute === targetMinute);
+function onNodeCleared() {
+    const clears = getStageClears(currentStageId);
+    clears[pendingNodeIndex] = true;
+    if (pendingNodeIndex === 5 && currentStageId === progress.unlockedStage && currentStageId < STAGES.length) {
+        progress.unlockedStage = currentStageId + 1;
+    }
+    saveProgress();
+}
 
-    if (isCorrect) {
+function handleCorrect() {
+    clearInterval(criticalTimer);
+
+    const isCritical = timeLeft > 0;
+    const damage = isCritical ? 2 : 1;
+
+    if (isCritical) {
+        showCriticalCutin(() => {
+            executeAttackAfterCutin(damage);
+        });
+    } else {
+        executeAttackAfterCutin(damage);
+    }
+}
+
+function showCriticalCutin(callback) {
+    const cutin = document.getElementById('critical-cutin');
+    
+    if (cutin) {
+        const charDef = CHARACTERS.find(c => c.id === progress.selectedCharacter) || CHARACTERS[0];
+        const imgEl = document.getElementById('critical-cutin-image');
+        if (imgEl) {
+            imgEl.style.backgroundImage = "url('" + charDef.img + "')";
+        }
+
+        cutin.classList.add('show');
+        playSfx('critical');
+
+        setTimeout(() => {
+            cutin.classList.remove('show');
+            if (callback) callback();
+        }, 1000);
+    } else {
+        if (callback) callback();
+    }
+}
+
+function executeAttackAfterCutin(damage) {
+    attackLunge('player', 40);
+
+    setTimeout(() => {
+        enemyHP = Math.max(0, enemyHP - damage);
+        renderHP();
+        flashHit('enemy');
+        shakeElement('enemy');
+
+        const isFinishingBlow = enemyHP <= 0;
+        playSfx(isFinishingBlow ? 'wrong' : 'hit');
+
+        if (!isFinishingBlow) {
+            const dmgText = damage === 2 ? "クリティカル！\nてきに 2のダメージ！" : "てきは 1のダメージ！";
+            showMessage(dmgText, 900);
+            isLocked = true;
+            setTimeout(() => {
+                generateQuestion();
+                isLocked = false;
+            }, 900);
+            return;
+        }
+
+        isLocked = true;
         playSfx('correct');
-        triggerPlayerAttack(() => {
-            const damage = Math.floor(enemyMaxHp / 3) + 1;
-            enemyHP = Math.max(0, enemyHP - damage);
-            renderHP();
-            triggerEnemyHit(() => {
-                if (enemyHP <= 0) {
-                    endBattle(true);
-                } else {
-                    setTimeout(generateQuestion, 600);
-                    isLocked = false;
-                }
-            });
-        });
-    } else {
-        playSfx('wrong');
-        triggerEnemyAttack(() => {
-            const damage = 35;
-            playerHP = Math.max(0, playerHP - damage);
-            renderHP();
-            triggerPlayerHit(() => {
-                if (playerHP <= 0) {
-                    endBattle(false);
-                } else {
-                    isLocked = false;
-                }
-            });
-        });
-    }
-}
+        score++;
+        const scoreText = document.getElementById('score-text');
+        if (scoreText) scoreText.innerText = "たおしたてき: " + score;
 
-function triggerPlayerAttack(callback) {
-    const playerEl = document.getElementById('player');
-    playSfx('critical');
-    if (playerEl) {
-        playerEl.style.transition = 'transform 0.2s';
-        playerEl.style.transform = 'translateX(60px) scale(1.1)';
-        setTimeout(() => {
-            playerEl.style.transform = 'none';
-            setTimeout(callback, 200);
-        }, 200);
-    } else {
-        callback();
-    }
-}
+        showMessage("てきを たおした！", 2000);
 
-function triggerEnemyHit(callback) {
-    playSfx('hit');
-    setTimeout(callback, 400);
-}
+        const enemy = document.getElementById('enemy');
+        const player = document.getElementById('player');
 
-function triggerEnemyAttack(callback) {
-    playSfx('hit');
-    setTimeout(callback, 200);
-}
-
-function triggerPlayerHit(callback) {
-    setTimeout(callback, 400);
-}
-
-function endBattle(isWin) {
-    const overlay = document.getElementById('message-overlay');
-    if (overlay) {
-        overlay.innerText = isWin ? 'ステージクリア！' : 'はいぼく…';
-        overlay.style.display = 'block';
-    }
-
-    if (isWin) {
-        if (!clearedNodesInStage.includes(pendingNodeIndex)) {
-            clearedNodesInStage.push(pendingNodeIndex);
-        }
-        if (pendingNodeIndex === 5) {
-            if (!progress.clearedStages.includes(currentStageId)) {
-                progress.clearedStages.push(currentStageId);
+        let hops = 0;
+        const hopAnim = setInterval(() => {
+            hops++;
+            if (player) player.style.transform = "translateY(" + (hops % 2 === 1 ? -14 : 0) + "px)";
+            if (hops >= 6) {
+                clearInterval(hopAnim);
+                if (player) player.style.transform = "none";
+                if (enemy) enemy.style.display = "none";
             }
-            if (currentStageId < STAGES.length && currentStageId >= progress.unlockedStage) {
-                progress.unlockedStage = currentStageId + 1;
-            }
+        }, 130);
+
+        setTimeout(() => {
+            if (player) player.style.transform = "none";
+            onNodeCleared();
+            enterMap(true);
+            isLocked = false;
+        }, 2000);
+    }, 150);
+}
+
+function handleWrong() {
+    clearInterval(criticalTimer);
+
+    attackLunge('enemy', -40);
+
+    setTimeout(() => {
+        playerHP = Math.max(0, playerHP - 1);
+        renderHP();
+        flashHit('player');
+        shakeElement('player');
+
+        const isFinishingBlow = playerHP <= 0;
+        playSfx(isFinishingBlow ? 'wrong' : 'hit');
+
+        if (!isFinishingBlow) {
+            showMessage("みかたは 1のダメージ！", 900);
+            isLocked = true;
+            setTimeout(() => { 
+                generateQuestion();
+                isLocked = false; 
+            }, 900);
+            return;
         }
-        // クリア状況をcompletedNodesに保存
-        progress.completedNodes[currentStageId] = clearedNodesInStage;
-        saveProgress();
+
+        isLocked = true;
+        showMessage("ゲームオーバー！", 1800);
         setTimeout(() => {
-            if (overlay) overlay.style.display = 'none';
-            openMapScreen();
-        }, 1500);
-    } else {
-        setTimeout(() => {
-            if (overlay) overlay.style.display = 'none';
-            openMapScreen();
-        }, 1500);
-    }
+            enterMap(true);
+            isLocked = false;
+        }, 1800);
+    }, 150);
 }
 
 /* ===================================================================
-    データ保存・読み込み
+    初期化
 ================================================================== */
-function saveProgress() {
-    try {
-        localStorage.setItem('shinkalion_quiz_progress', JSON.stringify(progress));
-    } catch (e) {}
-}
-
-function loadProgress() {
-    try {
-        const saved = localStorage.getItem('shinkalion_quiz_progress');
-        if (saved) {
-            const data = JSON.parse(saved);
-            progress.unlockedStage = data.unlockedStage || 1;
-            progress.clearedStages = data.clearedStages || [];
-            progress.selectedCharacter = data.selectedCharacter || 'e5hayabusa';
-            progress.completedNodes = data.completedNodes || {};
-        }
-    } catch (e) {}
-}
+window.onload = function() {
+    fitGame();
+    showScreen('top');
+};
