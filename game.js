@@ -1,266 +1,56 @@
 /* ===================================================================
-    サウンド関連
+    定数・データ定義
 ================================================================== */
-let soundOn = true;
-
-// ステージごとのフィールドBGMマッピング（6〜10は一旦同じ音源に設定）
-const STAGE_BGMS = {
-    1: new Audio(encodeURI('Sounds/オープニングオーケストラ「夜明け」.mp3')),
-    2: new Audio(encodeURI('Sounds/雲海.mp3')),
-    3: new Audio(encodeURI('Sounds/遠い空へ.mp3')),
-    4: new Audio(encodeURI('Sounds/試練の道.mp3')),
-    5: new Audio(encodeURI('Sounds/秘境の地.mp3')),
-    6: new Audio(encodeURI('Sounds/ブラックファクトリー.mp3')),
-    7: new Audio(encodeURI('Sounds/ブラックファクトリー.mp3')),
-    8: new Audio(encodeURI('Sounds/ブラックファクトリー.mp3')),
-    9: new Audio(encodeURI('Sounds/ブラックファクトリー.mp3')),
-    10: new Audio(encodeURI('Sounds/ブラックファクトリー.mp3'))
-};
-
-// バトル用・ボス用のBGM
-const battleBgm = new Audio(encodeURI('Sounds/炎乱.mp3'));
-const bossBgm = new Audio(encodeURI('Sounds/Battle_in_the_Moonlight.mp3'));
-
-// すべてのBGMのループとボリュームを設定
-for (const key in STAGE_BGMS) {
-    STAGE_BGMS[key].loop = true;
-    STAGE_BGMS[key].volume = 0.35;
-}
-battleBgm.loop = true;
-battleBgm.volume = 0.35;
-bossBgm.loop = true;
-bossBgm.volume = 0.35;
-
-const sfx = {
-    select: new Audio(encodeURI('Sounds/セレクト音風な効果音.mp3')),
-    decide: new Audio(encodeURI('Sounds/システム決定音_9.mp3')),
-    correct: new Audio(encodeURI('Sounds/ゲームクリアー！.mp3')),
-    wrong: new Audio(encodeURI('Sounds/爆破・爆発音.mp3')),
-    hit: new Audio(encodeURI('Sounds/打撃音.mp3')),
-    critical: new Audio(encodeURI('Sounds/レーザー攻撃.mp3'))
-};
-const sfxDefaultVolume = { select: 0.7, decide: 0.7, correct: 0.7, wrong: 0.7, hit: 0.7, critical: 0.8 };
-for (const key in sfx) {
-    sfx[key].volume = sfxDefaultVolume[key] ?? 0.7;
-}
-
-const sfxTimers = {};
-const sfxFadeIntervals = {};
-
-function playSfx(name) {
-    if (!soundOn) return;
-    const base = sfx[name];
-    if (!base) return;
-
-    if (sfxTimers[name]) { clearTimeout(sfxTimers[name]); sfxTimers[name] = null; }
-    if (sfxFadeIntervals[name]) { clearInterval(sfxFadeIntervals[name]); sfxFadeIntervals[name] = null; }
-
-    base.currentTime = 0;
-    base.volume = sfxDefaultVolume[name] ?? 0.7;
-    base.play().catch(() => {});
-
-    const fadeStartMs = 4000;
-    const fadeDurationMs = 1000;
-    const fadeSteps = 20;
-    const stepTime = fadeDurationMs / fadeSteps;
-
-    sfxTimers[name] = setTimeout(() => {
-        let step = 0;
-        const startVolume = base.volume;
-        sfxFadeIntervals[name] = setInterval(() => {
-            step++;
-            base.volume = Math.max(0, startVolume * (1 - step / fadeSteps));
-            if (step >= fadeSteps) {
-                clearInterval(sfxFadeIntervals[name]);
-                sfxFadeIntervals[name] = null;
-                base.pause();
-                base.currentTime = 0;
-                base.volume = sfxDefaultVolume[name] ?? 0.7;
-            }
-        }, stepTime);
-    }, fadeStartMs);
-}
-
-function stopAllBgm() {
-    for (const key in STAGE_BGMS) {
-        STAGE_BGMS[key].pause();
-    }
-    battleBgm.pause();
-    bossBgm.pause();
-}
-
-function playBgm(type, stageId) {
-    if (!soundOn) return;
-    stopAllBgm();
-
-    if (type === 'map') {
-        const bgm = STAGE_BGMS[stageId] || STAGE_BGMS[1];
-        bgm.play().catch(() => {});
-    } else if (type === 'battle') {
-        battleBgm.play().catch(() => {});
-    } else if (type === 'boss') {
-        bossBgm.play().catch(() => {});
-    }
-}
-
-function toggleSound() {
-    soundOn = !soundOn;
-    document.getElementById('sound-toggle').innerText = soundOn ? '🔊' : '🔇';
-    if (!soundOn) {
-        stopAllBgm();
-    } else {
-        if (currentScreen === 'map') playBgm('map', currentStageId);
-        if (currentScreen === 'battle') {
-            const isBoss = pendingNodeIndex === 5;
-            playBgm(isBoss ? 'boss' : 'battle');
-        }
-    }
-}
-
-/* ===================================================================
-    ゲームデータ ＆ キャラクタープロフィール
-================================================================== */
-const STAGES = [
-    { id: 1, bg: 'Images/stage/map01_メタバース空間.png' },
-    { id: 2, bg: 'Images/stage/map02_森.png' },
-    { id: 3, bg: 'Images/stage/map03_砂漠.png' },
-    { id: 4, bg: 'Images/stage/map04_宇宙.png' },
-    { id: 5, bg: 'Images/stage/map05_雪山.png' },
-    { id: 6, bg: 'Images/stage/map06_桜.png' },
-    { id: 7, bg: 'Images/stage/map07_深海.png' },
-    { id: 8, bg: 'Images/stage/map08_海上.png' },
-    { id: 9, bg: 'Images/stage/map09_マグマ.png' },
-    { id: 10, bg: 'Images/stage/map10_終焉.png' }
-];
-
-const NODE_POSITIONS = [
-    { x: 18, y: 72 },
-    { x: 32, y: 42 },
-    { x: 50, y: 68 },
-    { x: 68, y: 40 },
-    { x: 82, y: 65 },
-    { x: 50, y: 18 } // ボス
-];
-
 const CHARACTERS = [
-    { id: 'e5hayabusa', name: 'E5 はやぶさ', img: 'Images/CW/e5hayabusa.png' },
-    { id: 'e6komachi', name: 'E6 こまち', img: 'Images/CW/e6komachi.png' },
-    { id: 'e7kagayaki', name: 'E7 かがやき', img: 'Images/CW/e7kagayaki.png' },
-    { id: 'e8tsubasa', name: 'E8 つばさ', img: 'Images/CW/e8tsubasa.png' },
-    { id: 'h5hayabusa', name: 'H5 はやぶさ', img: 'Images/CW/h5hayabusa.png' },
-    { id: 'n700skamome', name: 'N700S かもめ', img: 'Images/CW/n700skamome.png' },
-    { id: 'n700snozomi', name: 'N700S のぞみ', img: 'Images/CW/n700snozomi.png' },
-    { id: 'yellow', name: 'ドクターイエロー', img: 'Images/CW/yellow.png' },
-    { id: 'srg', name: 'SRG', img: 'Images/CW/srg.png' }     
+    { id: 'e5hayabusa', name: 'E5はやぶさ', img: 'Images/CW/e5hayabusa.png' },
+    { id: 'e6komachi', name: 'E6こまち', img: 'Images/CW/e6komachi.png' },
+    { id: 'e7kagayaki', name: 'E7かがやき', img: 'Images/CW/e7kagayaki.png' },
+    { id: 'h5hayabusa', name: 'H5はやぶさ', img: 'Images/CW/h5hayabusa.png' },
+    { id: '800tsubame', name: '800つばめ', img: 'Images/CW/800tsubame.png' },
+    { id: 'n700s', name: 'N700Sのぞみ', img: 'Images/CW/n700s.png' },
+    { id: '500kodama', name: '500こだま', img: 'Images/CW/500kodama.png' },
+    { id: 'h5alphax', name: 'E8つばさ', img: 'Images/CW/e8tsubasa.png' }
 ];
 
 const SHINKALION_PROFILES = {
-    "500kodama": {
-        name: "５００こだまジンキフォーム",
-        soubi: "ダイナミックギガスパナ",
-        hissatsu: "—",
-        untenshi: "西大路 ヤマト"
-    },
-    "e5hayabusa": {
-        name: "Ｅ５はやぶさトレーラーフォーム",
-        soubi: "リクソウセイバー",
-        hissatsu: "グランクロス",
-        untenshi: "大成 タイセイ"
-    },
-    "e6komachi": {
-        name: "Ｅ６こまちトップリフターフォーム",
-        soubi: "キンテイガン",
-        hissatsu: "ツイストロックバスター",
-        untenshi: "フォールデンアカネ"
-    },
-    "e7kagayaki": {
-        name: "Ｅ７かがやきドリルフォーム",
-        soubi: "クッサクバンパー",
-        hissatsu: "ツインクッサクドリル",
-        untenshi: "九頭竜 リョータ"
-    },
-    "e8tsubasa": {
-        name: "Ｅ８つばさドローンフォーム",
-        soubi: "ホーネットライフル",
-        hissatsu: "—",
-        untenshi: "最上 ガンマ"
-    },
-    "h5hayabusa": {
-        name: "Ｈ５はやぶさドーザーフォーム",
-        soubi: "ドーザーハイドアーム",
-        hissatsu: "—",
-        untenshi: "五稜郭 シオン"
-    },
-    "n700skamome": {
-        name: "Ｎ７００Ｓかもめフェリーフォーム",
-        soubi: "サンドウカトラス",
-        hissatsu: "—",
-        untenshi: "海風 ツクモ"
-    },
-    "n700snozomi": {
-        name: "Ｎ７００Ｓのぞみブルートレーラー",
-        soubi: "リクソウブレード",
-        hissatsu: "—",
-        untenshi: "魚虎 テン"
-    },
-    "phantom": {
-        name: "ファントムシンカリオン",
-        soubi: "ファントムガントレットソード",
-        hissatsu: "—",
-        untenshi: "大成 イナ"
-    },
-    "srg": {
-        name: "シンカリオンＳＲＧ",
-        soubi: "—",
-        hissatsu: "—",
-        untenshi: "タイセイ・アカネ・リョータ"
-    },
-    "yellow": {
-        name: "グレートドクターイエロー",
-        soubi: "グレートケンソクブレード",
-        hissatsu: "—",
-        untenshi: "梔子 モリット"
-    },
-    "zero": {
-        name: "シンカリオン ０",
-        soubi: "ゼロブレード",
-        hissatsu: "—",
-        untenshi: "工部 レイジ"
-    }
+    'e5hayabusa': { name: 'E5はやぶさトレーラーフォーム', soubi: 'リクソウセイバー', hissatsu: 'グランクロス', untenshi: '大成タイセイ' },
+    'e6komachi': { name: 'E6こまち', soubi: 'フミキリガン', hissatsu: 'ガリウムシュート', untenshi: 'フォールツバサ' },
+    'e7kagayaki': { name: 'E7かがやき', soubi: 'シャリレンソード', hissatsu: 'オオマエザキ砲', untenshi: '九頭竜リョータ' },
+    'h5hayabusa': { name: 'H5はやぶさ', soubi: 'カイキョウソード', hissatsu: 'グランクロス', untenshi: '北海道の運転士' },
+    '800tsubame': { name: '800つばめ', soubi: 'パンタグラフアロー', hissatsu: '九州ブラスト', untenshi: '大成イナ' },
+    'n700s': { name: 'N700Sのぞみ', soubi: 'JRクナイ', hissatsu: 'アドバンスブレード', untenshi: '青梅キリン' },
+    '500kodama': { name: '500こだま', soubi: 'シンカウエポン', hissatsu: 'ソニックウェーブ', untenshi: '速杉ハヤト' },
+    'h5alphax': { name: 'E8つばさ', soubi: 'テツノコブシ', hissatsu: 'ウイングブーメラン', untenshi: '月山シノブ' }
 };
 
+const STAGES = [
+    { id: 1, name: "ステージ 1", bg: "Images/CW/bg_stage1.jpg" },
+    { id: 2, name: "ステージ 2", bg: "Images/CW/bg_stage2.jpg" },
+    { id: 3, name: "ステージ 3", bg: "Images/CW/bg_stage3.jpg" },
+    { id: 4, name: "ステージ 4", bg: "Images/CW/bg_stage4.jpg" },
+    { id: 5, name: "ステージ 5", bg: "Images/CW/bg_stage5.jpg" }
+];
+
 const STAGE_1_5_ENEMIES = [
-    'Images/CW/敵1.png',
-    'Images/CW/敵2.png',
-    'Images/CW/敵3.png',
-    'Images/CW/敵4.png',
-    'Images/CW/敵5.png'
+    'Images/CW/enemy1.png',
+    'Images/CW/enemy2.png'
 ];
-
 const STAGE_6_10_ENEMIES = [
-    'Images/CW/敵6.png',
-    'Images/CW/敵7.png',
-    'Images/CW/敵8.png',
-    'Images/CW/敵9.png',
-    'Images/CW/敵10.png'
+    'Images/CW/enemy1.png',
+    'Images/CW/enemy2.png'
 ];
 
-/* ===================================================================
-    ゲーム状態・変数
-================================================================== */
-let currentScreen = 'top';
-let currentStageId = 1;
-let currentNodeIndex = 0;
-let pendingNodeIndex = null;
-let isLocked = false;
-
-let playerHP = 100;
-let enemyHP = 100;
 const PLAYER_MAX_HP = 100;
 const ENEMY_MAX_HP = 100;
-let enemyMaxHp = 100;
 
+let playerHP = PLAYER_MAX_HP;
+let enemyHP = ENEMY_MAX_HP;
+let enemyMaxHp = ENEMY_MAX_HP;
+
+let currentStageId = 1;
+let pendingNodeIndex = 0;
 let clearedNodesInStage = [];
+let isLocked = false;
 
 let progress = {
     unlockedStage: 1,
@@ -269,22 +59,20 @@ let progress = {
     completedNodes: {}
 };
 
+let audioMuted = false;
+
+/* ===================================================================
+    初期化・画面切り替え
+================================================================== */
 window.addEventListener('DOMContentLoaded', () => {
     loadProgress();
-    initShireishitsu();
+    setupSoundToggle();
 });
 
 function showScreen(screenId) {
-    currentScreen = screenId;
-    document.querySelectorAll('.screen').forEach(el => {
-        el.style.display = 'none';
-        el.classList.remove('active');
-    });
+    document.querySelectorAll('.screen').forEach(el => el.style.display = 'none');
     const target = document.getElementById('screen-' + screenId);
-    if (target) {
-        target.style.display = 'block';
-        target.classList.add('active');
-    }
+    if (target) target.style.display = 'block';
 }
 
 function startGame() {
@@ -292,88 +80,120 @@ function startGame() {
     openMapScreen();
 }
 
-function prevStage() {
-    if (currentStageId > 1) {
-        currentStageId--;
-        playSfx('select');
-        updateStageNav();
-        openMapScreen();
+function setupSoundToggle() {
+    const btn = document.getElementById('sound-toggle');
+    if (btn) {
+        btn.onclick = () => {
+            audioMuted = !audioMuted;
+            btn.innerText = audioMuted ? '🎵 OFF' : '🎵 ON';
+        };
     }
 }
 
-function nextStage() {
-    if (currentStageId < progress.unlockedStage && currentStageId < STAGES.length) {
-        currentStageId++;
-        playSfx('select');
-        updateStageNav();
-        openMapScreen();
-    }
+function playSfx(type) {
+    if (audioMuted) return;
+    // 効果音再生処理（必要に応じて追加）
+}
+
+function playBgm(type) {
+    if (audioMuted) return;
+    // BGM再生処理（必要に応じて追加）
+}
+
+/* ===================================================================
+    マップ画面 ＆ ノード生成
+================================================================== */
+function openMapScreen() {
+    showScreen('map');
+    playBgm('map');
+    updateStageNav();
+    renderMapNodes();
 }
 
 function updateStageNav() {
-    const label = document.getElementById('stage-nav-label');
-    if (label) label.innerText = 'ステージ ' + currentStageId;
-    
-    const prevArrow = document.getElementById('prev-arrow');
-    const nextArrow = document.getElementById('next-arrow');
-    if (prevArrow) prevArrow.style.visibility = (currentStageId > 1) ? 'visible' : 'hidden';
-    if (nextArrow) nextArrow.style.visibility = (currentStageId < progress.unlockedStage && currentStageId < STAGES.length) ? 'visible' : 'hidden';
+    const textEl = document.getElementById('stage-nav-text');
+    if (textEl) textEl.innerText = STAGES[currentStageId - 1].name;
+
+    const prevBtn = document.getElementById('prev-stage-btn');
+    const nextBtn = document.getElementById('next-stage-btn');
+    if (prevBtn) prevBtn.classList.toggle('disabled', currentStageId <= 1);
+    if (nextBtn) nextBtn.classList.toggle('disabled', currentStageId >= progress.unlockedStage || currentStageId >= STAGES.length);
+
+    const screenMap = document.getElementById('screen-map');
+    if (screenMap) {
+        screenMap.style.backgroundImage = "url('" + STAGES[currentStageId - 1].bg + "')";
+    }
 }
 
-function openMapScreen() {
-    showScreen('map');
-    playBgm('map', currentStageId);
-    updateStageNav();
-
-    const stageDef = STAGES[currentStageId - 1];
-    document.getElementById('screen-map').style.backgroundImage = "url('" + stageDef.bg + "')";
-
-    if (!progress.completedNodes[currentStageId]) {
-        progress.completedNodes[currentStageId] = [];
+function changeStage(delta) {
+    playSfx('select');
+    const newId = currentStageId + delta;
+    if (newId >= 1 && newId <= progress.unlockedStage && newId <= STAGES.length) {
+        currentStageId = newId;
+        clearedNodesInStage = progress.completedNodes[currentStageId] || [];
+        updateStageNav();
+        renderMapNodes();
     }
-    clearedNodesInStage = progress.completedNodes[currentStageId];
+}
 
-    const nodesContainer = document.getElementById('map-nodes');
-    if (!nodesContainer) return;
-    nodesContainer.innerHTML = '';
+function renderMapNodes() {
+    const container = document.getElementById('map-nodes');
+    if (!container) return;
+    container.innerHTML = '';
 
-    NODE_POSITIONS.forEach((pos, index) => {
-        const nodeBtn = document.createElement('div');
-        nodeBtn.className = 'map-node';
-        if (index === 5) nodeBtn.classList.add('boss-node');
-        nodeBtn.style.left = pos.x + '%';
-        nodeBtn.style.top = pos.y + '%';
-        nodeBtn.innerText = index === 5 ? '★' : (index + 1);
+    clearedNodesInStage = progress.completedNodes[currentStageId] || [];
 
+    // ステップごとの座標配置（ステージマップ上の位置）
+    const nodeCoords = [
+        { x: 50, y: 78 }, // 0
+        { x: 30, y: 64 }, // 1
+        { x: 70, y: 50 }, // 2
+        { x: 35, y: 36 }, // 3
+        { x: 65, y: 22 }, // 4
+        { x: 50, y: 10 }  // 5 (ボス)
+    ];
+
+    nodeCoords.forEach((coord, index) => {
+        const marker = document.createElement('div');
+        const isBoss = (index === 5);
         const isCleared = clearedNodesInStage.includes(index);
-        let isEnabled = false;
+        
+        // 前のノードがクリアされているか、最初のノード、またはボス手前までクリア済みなら解放
+        const isUnlocked = (index === 0) || clearedNodesInStage.includes(index - 1) || isCleared;
 
-        if (index === 0) {
-            isEnabled = true;
-        } else if (index < 5) {
-            if (clearedNodesInStage.includes(index - 1) || isCleared) {
-                isEnabled = true;
-            }
-        } else if (index === 5) {
-            if (clearedNodesInStage.includes(3) || clearedNodesInStage.includes(4)) {
-                isEnabled = true;
-            }
-        }
+        let className = 'node-marker';
+        if (isBoss) className += ' boss';
+        if (isCleared) className += ' cleared';
+        if (!isUnlocked) className += ' locked';
 
-        if (isCleared) {
-            nodeBtn.classList.add('cleared');
-        } else if (isEnabled) {
-            nodeBtn.classList.add('active');
-            nodeBtn.onclick = () => {
-                playSfx('decide');
-                pendingNodeIndex = index;
-                openNodePopup(index);
-            };
-        } else {
-            nodeBtn.classList.add('locked');
-        }
-        nodesContainer.appendChild(nodeBtn);
+        marker.className = className;
+        marker.style.left = coord.x + '%';
+        marker.style.top = coord.y + '%';
+        marker.innerText = isBoss ? 'BOSS' : (index + 1);
+
+        marker.onclick = () => {
+            if (!isUnlocked) {
+                playSfx('wrong');
+                showMapToast('前のバトルポイントをクリアしてください！');
+                return;
+            }
+            playSfx('select');
+            pendingNodeIndex = index;
+            openNodePopup(index);
+        };
+
+        container.appendChild(marker);
     });
+}
+
+function showMapToast(msg) {
+    const toast = document.getElementById('map-toast');
+    if (!toast) return;
+    toast.innerText = msg;
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 2000);
 }
 function openNodePopup(index) {
     const popup = document.getElementById('node-popup');
@@ -424,14 +244,26 @@ function initShireishitsu() {
     grid.innerHTML = '';
 
     CHARACTERS.forEach(ch => {
-        const item = document.createElement('div');
-        item.className = 'character-grid-item' + (progress.selectedCharacter === ch.id ? ' selected' : '');
-        item.style.backgroundImage = "url('" + ch.img + "')";
+        // CSSのクラス構造に合わせて card / thumb / name を生成
+        const item = document.createElement('button');
+        item.className = 'character-face-card' + (progress.selectedCharacter === ch.id ? ' selected' : '');
+        
+        const thumb = document.createElement('div');
+        thumb.className = 'character-face-thumb';
+        thumb.style.backgroundImage = "url('" + ch.img + "')";
+        
+        const nameEl = document.createElement('div');
+        nameEl.className = 'character-face-name';
+        nameEl.innerText = ch.name;
+
+        item.appendChild(thumb);
+        item.appendChild(nameEl);
+
         item.onclick = () => {
             playSfx('select');
             progress.selectedCharacter = ch.id;
             saveProgress();
-            document.querySelectorAll('.character-grid-item').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.character-face-card').forEach(el => el.classList.remove('selected'));
             item.classList.add('selected');
             updateCharacterPreview(ch.id);
         };
@@ -667,6 +499,8 @@ function endBattle(isWin) {
                 progress.unlockedStage = currentStageId + 1;
             }
         }
+        // クリア状況をcompletedNodesに保存
+        progress.completedNodes[currentStageId] = clearedNodesInStage;
         saveProgress();
         setTimeout(() => {
             if (overlay) overlay.style.display = 'none';
