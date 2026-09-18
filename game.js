@@ -229,7 +229,6 @@ const SHINKALION_PROFILES = {
     }
 };
 
-// ステージ1〜5用：敵1〜5
 const STAGE_1_5_ENEMIES = [
     'Images/CW/敵1.png',
     'Images/CW/敵2.png',
@@ -238,7 +237,6 @@ const STAGE_1_5_ENEMIES = [
     'Images/CW/敵5.png'
 ];
 
-// ステージ6〜10用：敵6〜10
 const STAGE_6_10_ENEMIES = [
     'Images/CW/敵6.png',
     'Images/CW/敵7.png',
@@ -250,7 +248,7 @@ const STAGE_6_10_ENEMIES = [
 /* ===================================================================
     ゲーム状態・変数
 ================================================================== */
-let currentScreen = 'title';
+let currentScreen = 'top';
 let currentStageId = 1;
 let currentNodeIndex = 0;
 let pendingNodeIndex = null;
@@ -262,7 +260,6 @@ const PLAYER_MAX_HP = 100;
 const ENEMY_MAX_HP = 100;
 let enemyMaxHp = 100;
 
-let currentQuestion = null;
 let clearedNodesInStage = [];
 
 let progress = {
@@ -272,128 +269,72 @@ let progress = {
     completedNodes: {}
 };
 
-/* ===================================================================
-    初期化と画面遷移
-================================================================== */
 window.addEventListener('DOMContentLoaded', () => {
     loadProgress();
-    initTitleScreen();
-    initStageSelectScreen();
+    initShireishitsu();
 });
 
 function showScreen(screenId) {
     currentScreen = screenId;
-    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-    document.getElementById('screen-' + screenId).classList.add('active');
-}
-
-/* ===================================================================
-    タイトル画面
-================================================================== */
-function initTitleScreen() {
-    const listEl = document.getElementById('title-chara-list');
-    listEl.innerHTML = '';
-    CHARACTERS.forEach(ch => {
-        const div = document.createElement('div');
-        div.className = 'title-chara-item' + (progress.selectedCharacter === ch.id ? ' selected' : '');
-        div.style.backgroundImage = "url('" + ch.img + "')";
-        div.title = ch.name;
-        div.onclick = () => {
-            playSfx('select');
-            progress.selectedCharacter = ch.id;
-            saveProgress();
-            document.querySelectorAll('.title-chara-item').forEach(el => el.classList.remove('selected'));
-            div.classList.add('selected');
-        };
-        listEl.appendChild(div);
+    document.querySelectorAll('.screen').forEach(el => {
+        el.style.display = 'none';
+        el.classList.remove('active');
     });
+    const target = document.getElementById('screen-' + screenId);
+    if (target) {
+        target.style.display = 'block';
+        target.classList.add('active');
+    }
 }
 
 function startGame() {
     playSfx('decide');
-    openStageSelect();
+    openMapScreen();
 }
 
-/* ===================================================================
-    ステージ選択画面
-================================================================== */
-function openStageSelect() {
-    showScreen('stage-select');
-    const container = document.getElementById('stage-cards-container');
-    container.innerHTML = '';
-
-    STAGES.forEach(stage => {
-        const card = document.createElement('div');
-        card.className = 'stage-card';
-        if (stage.id > progress.unlockedStage) {
-            card.classList.add('locked');
-        }
-        card.style.backgroundImage = "url('" + stage.bg + "')";
-
-        const info = document.createElement('div');
-        info.className = 'stage-info';
-        info.innerHTML = `<h3>ステージ ${stage.id}</h3>`;
-        card.appendChild(info);
-
-        if (stage.id <= progress.unlockedStage) {
-            card.onclick = () => {
-                playSfx('decide');
-                currentStageId = stage.id;
-                openMapScreen();
-            };
-        }
-        container.appendChild(card);
-    });
+function prevStage() {
+    if (currentStageId > 1) {
+        currentStageId--;
+        playSfx('select');
+        updateStageNav();
+        openMapScreen();
+    }
 }
 
-function closeStageSelect() {
-    playSfx('select');
-    showScreen('title');
+function nextStage() {
+    if (currentStageId < progress.unlockedStage && currentStageId < STAGES.length) {
+        currentStageId++;
+        playSfx('select');
+        updateStageNav();
+        openMapScreen();
+    }
 }
 
-/* ===================================================================
-    マップ画面
-================================================================== */
+function updateStageNav() {
+    const label = document.getElementById('stage-nav-label');
+    if (label) label.innerText = 'ステージ ' + currentStageId;
+    
+    const prevArrow = document.getElementById('prev-arrow');
+    const nextArrow = document.getElementById('next-arrow');
+    if (prevArrow) prevArrow.style.visibility = (currentStageId > 1) ? 'visible' : 'hidden';
+    if (nextArrow) nextArrow.style.visibility = (currentStageId < progress.unlockedStage && currentStageId < STAGES.length) ? 'visible' : 'hidden';
+}
+
 function openMapScreen() {
     showScreen('map');
     playBgm('map', currentStageId);
+    updateStageNav();
 
     const stageDef = STAGES[currentStageId - 1];
     document.getElementById('screen-map').style.backgroundImage = "url('" + stageDef.bg + "')";
-    document.getElementById('map-stage-title').innerText = 'ステージ ' + currentStageId;
 
     if (!progress.completedNodes[currentStageId]) {
         progress.completedNodes[currentStageId] = [];
     }
     clearedNodesInStage = progress.completedNodes[currentStageId];
 
-    const svg = document.getElementById('map-svg');
-    svg.innerHTML = '';
-    for (let i = 0; i < NODE_POSITIONS.length - 1; i++) {
-        const p1 = NODE_POSITIONS[i];
-        const p2 = NODE_POSITIONS[i+1];
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', p1.x + '%');
-        line.setAttribute('y1', p1.y + '%');
-        line.setAttribute('x2', p2.x + '%');
-        line.setAttribute('y2', p2.y + '%');
-        line.setAttribute('stroke', 'rgba(255,255,255,0.5)');
-        line.setAttribute('stroke-width', '4');
-        line.setAttribute('stroke-dasharray', '6,6');
-        svg.appendChild(line);
-    }
-    const pLastBefore = NODE_POSITIONS[3];
-    const pBoss = NODE_POSITIONS[5];
-    const lineBoss = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    lineBoss.setAttribute('x1', pLastBefore.x + '%');
-    lineBoss.setAttribute('y1', pLastBefore.y + '%');
-    lineBoss.setAttribute('x2', pBoss.x + '%');
-    lineBoss.setAttribute('y2', pBoss.y + '%');
-    lineBoss.setAttribute('stroke', 'rgba(255,100,100,0.7)');
-    lineBoss.setAttribute('stroke-width', '5');
-    svg.appendChild(lineBoss);
-
-    const nodesContainer = document.getElementById('map-nodes-container');
+    const nodesContainer = document.getElementById('map-nodes');
+    if (!nodesContainer) return;
     nodesContainer.innerHTML = '';
 
     NODE_POSITIONS.forEach((pos, index) => {
@@ -426,7 +367,7 @@ function openMapScreen() {
             nodeBtn.onclick = () => {
                 playSfx('decide');
                 pendingNodeIndex = index;
-                startBattle(index);
+                openNodePopup(index);
             };
         } else {
             nodeBtn.classList.add('locked');
@@ -434,14 +375,102 @@ function openMapScreen() {
         nodesContainer.appendChild(nodeBtn);
     });
 }
+function openNodePopup(index) {
+    const popup = document.getElementById('node-popup');
+    const title = document.getElementById('node-popup-title');
+    if (title) {
+        title.innerText = index === 5 ? ('ステージ ' + currentStageId + ' ボス') : ('バトルポイント ' + (index + 1));
+    }
+    if (popup) popup.style.display = 'flex';
+}
 
-function backToStageSelect() {
+function closeNodePopup() {
     playSfx('select');
-    openStageSelect();
+    const popup = document.getElementById('node-popup');
+    if (popup) popup.style.display = 'none';
+}
+
+function confirmBattleStart() {
+    closeNodePopup();
+    startBattle(pendingNodeIndex);
 }
 
 /* ===================================================================
-    バトル画面 ＆ クイズ処理
+    メニュー ＆ しれいしつ
+================================================================== */
+function openMenu() {
+    playSfx('select');
+    const menu = document.getElementById('menu-overlay');
+    if (menu) menu.style.display = 'flex';
+}
+
+function closeMenu() {
+    playSfx('select');
+    const menu = document.getElementById('menu-overlay');
+    if (menu) menu.style.display = 'none';
+}
+
+function openShireishitsu() {
+    closeMenu();
+    playSfx('select');
+    const shiri = document.getElementById('shireishitsu-overlay');
+    if (shiri) shiri.style.display = 'flex';
+    initShireishitsu();
+}
+
+function initShireishitsu() {
+    const grid = document.getElementById('character-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    CHARACTERS.forEach(ch => {
+        const item = document.createElement('div');
+        item.className = 'character-grid-item' + (progress.selectedCharacter === ch.id ? ' selected' : '');
+        item.style.backgroundImage = "url('" + ch.img + "')";
+        item.onclick = () => {
+            playSfx('select');
+            progress.selectedCharacter = ch.id;
+            saveProgress();
+            document.querySelectorAll('.character-grid-item').forEach(el => el.classList.remove('selected'));
+            item.classList.add('selected');
+            updateCharacterPreview(ch.id);
+        };
+        grid.appendChild(item);
+    });
+
+    updateCharacterPreview(progress.selectedCharacter);
+}
+
+function updateCharacterPreview(chId) {
+    const ch = CHARACTERS.find(c => c.id === chId) || CHARACTERS[0];
+    const profile = SHINKALION_PROFILES[ch.id] || { name: ch.name, soubi: "—", hissatsu: "—", untenshi: "—" };
+
+    const imgEl = document.getElementById('character-preview-img');
+    const nameEl = document.getElementById('character-preview-name');
+    const soubiEl = document.getElementById('profile-soubi');
+    const hissatsuEl = document.getElementById('profile-hissatsu');
+    const untenshiEl = document.getElementById('profile-untenshi');
+
+    if (imgEl) imgEl.style.backgroundImage = "url('" + ch.img + "')";
+    if (nameEl) nameEl.innerText = profile.name;
+    if (soubiEl) soubiEl.innerText = profile.soubi;
+    if (hissatsuEl) hissatsuEl.innerText = profile.hissatsu;
+    if (untenshiEl) untenshiEl.innerText = profile.untenshi;
+}
+
+function closeShireishitsu() {
+    playSfx('decide');
+    const shiri = document.getElementById('shireishitsu-overlay');
+    if (shiri) shiri.style.display = 'none';
+}
+
+function backToMap() {
+    playSfx('select');
+    openMapScreen();
+}
+
+/* ===================================================================
+    バトル画面 ＆ クイズ・時計処理
 ================================================================== */
 function startBattle(nodeIndex) {
     showScreen('battle');
@@ -454,10 +483,7 @@ function startBattle(nodeIndex) {
     const playerEl = document.getElementById('player');
     const enemyEl = document.getElementById('enemy');
 
-    playerEl.classList.remove('shake', 'hit-flash');
-    enemyEl.classList.remove('shake', 'hit-flash');
     playerEl.style.transform = 'none';
-
     const charDef = CHARACTERS.find(c => c.id === progress.selectedCharacter) || CHARACTERS[0];
     playerEl.style.backgroundImage = "url('" + charDef.img + "')";
 
@@ -475,84 +501,91 @@ function startBattle(nodeIndex) {
     enemyHP = enemyMaxHp;
     renderHP();
 
-    document.getElementById('stage-text').innerText =
-        isBoss ? ('ステージ' + currentStageId + ' ボス') : ('ステージ' + currentStageId + '-' + (nodeIndex + 1));
+    const stageText = document.getElementById('stage-text');
+    if (stageText) {
+        stageText.innerText = isBoss ? ('ステージ' + currentStageId + ' ボス') : ('ステージ' + currentStageId + '-' + (nodeIndex + 1));
+    }
 
     isLocked = false;
     generateQuestion();
 }
 
 function renderHP() {
-    document.getElementById('player-hp-bar').style.width = Math.max(0, (playerHP / PLAYER_MAX_HP) * 100) + '%';
-    document.getElementById('enemy-hp-bar').style.width = Math.max(0, (enemyHP / enemyMaxHp) * 100) + '%';
-    document.getElementById('player-hp-text').innerText = playerHP + ' / ' + PLAYER_MAX_HP;
-    document.getElementById('enemy-hp-text').innerText = enemyHP + ' / ' + enemyMaxHp;
+    const pBar = document.getElementById('player-hp');
+    const eBar = document.getElementById('enemy-hp');
+    if (pBar) pBar.style.width = Math.max(0, (playerHP / PLAYER_MAX_HP) * 100) + '%';
+    if (eBar) eBar.style.width = Math.max(0, (enemyHP / enemyMaxHp) * 100) + '%';
 }
+
+let targetHour = 3;
+let targetMinute = 0;
+let currentHour = 3;
+let currentMinute = 0;
 
 function generateQuestion() {
-    const qTypes = ['soubi', 'hissatsu', 'untenshi'];
-    const qType = qTypes[Math.floor(Math.random() * qTypes.length)];
+    targetHour = Math.floor(Math.random() * 12) + 1;
+    targetMinute = Math.floor(Math.random() * 12) * 5;
 
-    const keys = Object.keys(SHINKALION_PROFILES);
-    const correctKey = keys[Math.floor(Math.random() * keys.length)];
-    const correctObj = SHINKALION_PROFILES[correctKey];
+    currentHour = (targetHour + Math.floor(Math.random() * 3) - 1 + 12) % 12 || 12;
+    currentMinute = (targetMinute + (Math.floor(Math.random() * 4) - 2) * 5 + 60) % 60;
 
-    let questionText = '';
-    let correctAnswer = '';
-
-    if (qType === 'soubi') {
-        questionText = `「${correctObj.name}」の装備（武器など）は何？`;
-        correctAnswer = correctObj.soubi;
-    } else if (qType === 'hissatsu') {
-        questionText = `「${correctObj.name}」の必殺技は何？`;
-        correctAnswer = correctObj.hissatsu;
-    } else {
-        questionText = `「${correctObj.name}」の運転士は誰？`;
-        correctAnswer = correctObj.untenshi;
-    }
-
-    let choices = [correctAnswer];
-    while (choices.length < 4) {
-        const randKey = keys[Math.floor(Math.random() * keys.length)];
-        const randObj = SHINKALION_PROFILES[randKey];
-        let val = '';
-        if (qType === 'soubi') val = randObj.soubi;
-        else if (qType === 'hissatsu') val = randObj.hissatsu;
-        else val = randObj.untenshi;
-
-        if (val && !choices.includes(val)) {
-            choices.push(val);
-        }
-    }
-    choices.sort(() => Math.random() - 0.5);
-
-    currentQuestion = { correctAnswer: correctAnswer };
-    document.getElementById('question-text').innerText = questionText;
-
-    const choicesContainer = document.getElementById('choices-container');
-    choicesContainer.innerHTML = '';
-    choices.forEach(choice => {
-        const btn = document.createElement('button');
-        btn.className = 'choice-btn';
-        btn.innerText = choice;
-        btn.onclick = () => handleAnswer(choice, btn);
-        choicesContainer.appendChild(btn);
-    });
+    updateClockDisplay();
 }
 
-function handleAnswer(selectedChoice, btnElement) {
+function changeHour(delta) {
+    playSfx('select');
+    currentHour = ((currentHour - 1 + delta + 12) % 12) + 1;
+    updateClockDisplay();
+}
+
+function changeMinute() {
+    playSfx('select');
+    currentMinute = (currentMinute + 5) % 60;
+    updateClockDisplay();
+}
+
+function updateClockDisplay() {
+    const hDisp = document.getElementById('hour-display');
+    const mDisp = document.getElementById('minute-display');
+    if (hDisp) hDisp.innerText = String(currentHour).padStart(2, '0');
+    if (mDisp) mDisp.innerText = String(currentMinute).padStart(2, '0');
+
+    drawClockHands(currentHour, currentMinute);
+}
+
+function drawClockHands(hour, minute) {
+    const canvas = document.getElementById('handCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+
+    const minuteAngle = (minute / 60) * 2 * Math.PI - Math.PI / 2;
+    ctx.beginPath();
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#333';
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(minuteAngle) * 110, cy + Math.sin(minuteAngle) * 110);
+    ctx.stroke();
+
+    const hourAngle = ((hour % 12) / 12) * 2 * Math.PI + (minute / 60) * (2 * Math.PI / 12) - Math.PI / 2;
+    ctx.beginPath();
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#111';
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(hourAngle) * 75, cy + Math.sin(hourAngle) * 75);
+    ctx.stroke();
+}
+
+function checkAnswer() {
     if (isLocked) return;
     isLocked = true;
 
-    const isCorrect = (selectedChoice === currentQuestion.correctAnswer);
-    const buttons = document.querySelectorAll('.choice-btn');
-    buttons.forEach(b => {
-        if (b.innerText === currentQuestion.correctAnswer) {
-            b.classList.add('correct');
-        } else if (b === btnElement && !isCorrect) {
-            b.classList.add('wrong');
-        }
-    });
+    const isCorrect = (currentHour === targetHour && currentMinute === targetMinute);
 
     if (isCorrect) {
         playSfx('correct');
@@ -579,7 +612,6 @@ function handleAnswer(selectedChoice, btnElement) {
                 if (playerHP <= 0) {
                     endBattle(false);
                 } else {
-                    setTimeout(generateQuestion, 600);
                     isLocked = false;
                 }
             });
@@ -590,45 +622,39 @@ function handleAnswer(selectedChoice, btnElement) {
 function triggerPlayerAttack(callback) {
     const playerEl = document.getElementById('player');
     playSfx('critical');
-    playerEl.style.transition = 'transform 0.2s';
-    playerEl.style.transform = 'translateX(60px) scale(1.1)';
-    setTimeout(() => {
-        playerEl.style.transform = 'none';
-        setTimeout(callback, 200);
-    }, 200);
+    if (playerEl) {
+        playerEl.style.transition = 'transform 0.2s';
+        playerEl.style.transform = 'translateX(60px) scale(1.1)';
+        setTimeout(() => {
+            playerEl.style.transform = 'none';
+            setTimeout(callback, 200);
+        }, 200);
+    } else {
+        callback();
+    }
 }
 
 function triggerEnemyHit(callback) {
-    const enemyEl = document.getElementById('enemy');
     playSfx('hit');
-    enemyEl.classList.add('shake', 'hit-flash');
-    setTimeout(() => {
-        enemyEl.classList.remove('shake', 'hit-flash');
-        callback();
-    }, 400);
+    setTimeout(callback, 400);
 }
 
 function triggerEnemyAttack(callback) {
-    const enemyEl = document.getElementById('enemy');
     playSfx('hit');
-    enemyEl.style.transition = 'transform 0.2s';
-    enemyEl.style.transform = 'translateX(-60px) scale(1.1)';
-    setTimeout(() => {
-        enemyEl.style.transform = 'none';
-        setTimeout(callback, 200);
-    }, 200);
+    setTimeout(callback, 200);
 }
 
 function triggerPlayerHit(callback) {
-    const playerEl = document.getElementById('player');
-    playerEl.classList.add('shake', 'hit-flash');
-    setTimeout(() => {
-        playerEl.classList.remove('shake', 'hit-flash');
-        callback();
-    }, 400);
+    setTimeout(callback, 400);
 }
 
 function endBattle(isWin) {
+    const overlay = document.getElementById('message-overlay');
+    if (overlay) {
+        overlay.innerText = isWin ? 'ステージクリア！' : 'はいぼく…';
+        overlay.style.display = 'block';
+    }
+
     if (isWin) {
         if (!clearedNodesInStage.includes(pendingNodeIndex)) {
             clearedNodesInStage.push(pendingNodeIndex);
@@ -643,11 +669,14 @@ function endBattle(isWin) {
         }
         saveProgress();
         setTimeout(() => {
+            if (overlay) overlay.style.display = 'none';
             openMapScreen();
-        }, 1000);
+        }, 1500);
     } else {
-        alert('敗北してしまった…！もう一度挑戦しよう！');
-        openMapScreen();
+        setTimeout(() => {
+            if (overlay) overlay.style.display = 'none';
+            openMapScreen();
+        }, 1500);
     }
 }
 
