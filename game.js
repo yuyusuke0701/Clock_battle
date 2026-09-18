@@ -21,7 +21,11 @@ const STAGE_BGMS = {
     3: new Audio(encodeURI('Sounds/遠い空へ.mp3')),
     4: new Audio(encodeURI('Sounds/試練の道.mp3')),
     5: new Audio(encodeURI('Sounds/秘境の地.mp3')),
-    6: new Audio(encodeURI('Sounds/ブラックファクトリー.mp3'))
+    6: new Audio(encodeURI('Sounds/ブラックファクトリー.mp3')),
+    7: new Audio(encodeURI('Sounds/ブラックファクトリー.mp3')),
+    8: new Audio(encodeURI('Sounds/ブラックファクトリー.mp3')),
+    9: new Audio(encodeURI('Sounds/ブラックファクトリー.mp3')),
+    10: new Audio(encodeURI('Sounds/ブラックファクトリー.mp3'))
 };
 
 const battleBgm = new Audio(encodeURI('Sounds/炎乱.mp3'));
@@ -129,10 +133,14 @@ function toggleSound() {
 const STAGES = [
     { id: 1, bg: 'Images/stage/map01_メタバース空間.png' },
     { id: 2, bg: 'Images/stage/map02_森.png' },
-    { id: 3, bg: 'Images/stage/map03_街.png' },
-    { id: 4, bg: 'Images/stage/map04_車両基地.png' },
-    { id: 5, bg: 'Images/stage/map05_月.png' },
-    { id: 6, bg: 'Images/stage/map06_アジト.png' }
+    { id: 3, bg: 'Images/stage/map03_砂漠.png' },
+    { id: 4, bg: 'Images/stage/map04_宇宙.png' },
+    { id: 5, bg: 'Images/stage/map05_雪山.png' },
+    { id: 6, bg: 'Images/stage/map06_桜.png' },
+    { id: 7, bg: 'Images/stage/map07_深海.png' },
+    { id: 8, bg: 'Images/stage/map08_海上.png' },
+    { id: 9, bg: 'Images/stage/map09_マグマ.png' },
+    { id: 10, bg: 'Images/stage/map10_終焉.png' }
 ];
 
 const NODE_POSITIONS = [
@@ -171,11 +179,20 @@ const SHINKALION_PROFILES = {
     "zero": { name: "シンカリオン ０", soubi: "ゼロブレード", hissatsu: "—", untenshi: "工部 レイジ" }
 };
 
-const NORMAL_ENEMY_IMAGES = [
+const NORMAL_ENEMY_IMAGES_1_5 = [
     'Images/CW/敵1.png',
     'Images/CW/敵2.png',
     'Images/CW/敵3.png',
-    'Images/CW/敵4.png'
+    'Images/CW/敵4.png',
+    'Images/CW/敵5.png'
+];
+
+const NORMAL_ENEMY_IMAGES_6_10 = [
+    'Images/CW/敵6.png',
+    'Images/CW/敵7.png',
+    'Images/CW/敵8.png',
+    'Images/CW/敵9.png',
+    'Images/CW/敵10.png'
 ];
 
 const SAVE_KEY = 'shinkalion_clock_master_save_v1';
@@ -207,7 +224,6 @@ if (!progress.visitedStages) progress.visitedStages = {};
 let currentScreen = 'top';
 let currentStageId = progress.unlockedStage;
 let pendingNodeIndex = null;
-
 /* ===================================================================
     画面切り替え
 ================================================================== */
@@ -354,6 +370,7 @@ function confirmBattleStart() {
     if (popup) popup.style.display = 'none';
     startBattle(pendingNodeIndex);
 }
+
 /* ===================================================================
     メニュー / しれいしつ ＆ プロフィール表示更新
 ================================================================== */
@@ -655,7 +672,8 @@ function startBattle(nodeIndex) {
         if (isBoss) {
             enemyEl.style.backgroundImage = "url('Images/CW/hades.png')";
         } else {
-            const randomEnemy = NORMAL_ENEMY_IMAGES[Math.floor(Math.random() * NORMAL_ENEMY_IMAGES.length)];
+            const enemyList = currentStageId <= 5 ? NORMAL_ENEMY_IMAGES_1_5 : NORMAL_ENEMY_IMAGES_6_10;
+            const randomEnemy = enemyList[Math.floor(Math.random() * enemyList.length)];
             enemyEl.style.backgroundImage = "url('" + randomEnemy + "')";
         }
         enemyEl.style.display = 'block';
