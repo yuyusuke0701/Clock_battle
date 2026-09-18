@@ -168,7 +168,7 @@ const SHINKALION_PROFILES = {
         untenshi: "大成 タイセイ"
     },
     "e6komachi": {
-        name: "Ｅ６こまちトップリフターフォー",
+        name: "Ｅ６こまちトップリフターフォーム",
         soubi: "キンテイガン",
         hissatsu: "ツイストロックバスター",
         untenshi: "フォールデンアカネ"
@@ -192,13 +192,13 @@ const SHINKALION_PROFILES = {
         untenshi: "五稜郭 シオン"
     },
     "n700skamome": {
-        name: "Ｎ７００Ｓかもめフェリーフォー",
+        name: "Ｎ７００Ｓかもめフェリーフォーム",
         soubi: "サンドウカトラス",
         hissatsu: "—",
         untenshi: "海風 ツクモ"
     },
     "n700snozomi": {
-        name: "Ｎ７００Ｓのぞみブルートレーラ",
+        name: "Ｎ７００Ｓのぞみブルートレーラー",
         soubi: "リクソウブレード",
         hissatsu: "—",
         untenshi: "魚虎 テン"
