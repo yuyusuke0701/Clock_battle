@@ -667,6 +667,27 @@ function hideLoading() {
 }
 
 /* ===================================================================
+    ローディング画面の制御
+================================================================== */
+function showLoading(text) {
+    const overlay = document.getElementById('loading-overlay');
+    const textEl = document.getElementById('loading-text');
+    if (textEl && text) {
+        textEl.innerText = text;
+    }
+    if (overlay) {
+        overlay.style.display = 'flex';
+    }
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+}
+
+/* ===================================================================
     バトル開始処理 ＆ 画像ローディング対応
 ================================================================== */
 function startBattle(nodeIndex) {
@@ -745,7 +766,6 @@ function executeActualBattleStart(nodeIndex) {
     isLocked = false;
     generateQuestion();
 }
-
 
 function backToMap() {
     if (isLocked) return;
