@@ -645,8 +645,61 @@ function checkAnswer() {
         handleWrong();
     }
 }
+/* ===================================================================
+    ローディング画面の制御
+================================================================== */
+function showLoading(text) {
+    const overlay = document.getElementById('loading-overlay');
+    const textEl = document.getElementById('loading-text');
+    if (textEl && text) {
+        textEl.innerText = text;
+    }
+    if (overlay) {
+        overlay.style.display = 'flex';
+    }
+}
 
+function hideLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+}
+
+/* ===================================================================
+    バトル開始処理 ＆ 画像ローディング対応
+================================================================== */
 function startBattle(nodeIndex) {
+    // 1. バトル準備中のローディングを表示
+    showLoading("バトルじゅんび中...");
+
+    const isBoss = nodeIndex === 5;
+    const stageDef = STAGES[currentStageId - 1];
+    
+    const charDef = CHARACTERS.find(c => c.id === progress.selectedCharacter) || CHARACTERS[0];
+    const enemyImgPath = isBoss ? 'Images/CW/hades.png' : (currentStageId <= 5 ? NORMAL_ENEMY_IMAGES_1_5[0] : NORMAL_ENEMY_IMAGES_6_10[0]);
+    const bgImgPath = stageDef.bg;
+
+    let loadedCount = 0;
+    const imagesToLoad = [charDef.img, enemyImgPath, bgImgPath];
+
+    function checkAllImagesLoaded() {
+        loadedCount++;
+        if (loadedCount >= imagesToLoad.length) {
+            executeActualBattleStart(nodeIndex);
+            hideLoading(); // すべての読み込みが完了したらローディングを隠す
+        }
+    }
+
+    imagesToLoad.forEach(path => {
+        const img = new Image();
+        img.onload = checkAllImagesLoaded;
+        img.onerror = checkAllImagesLoaded; // エラー時もフリーズしないように進める
+        img.src = path;
+    });
+}
+
+function executeActualBattleStart(nodeIndex) {
     showScreen('battle');
     const isBoss = nodeIndex === 5;
     playBgm(isBoss ? 'boss' : 'battle');
@@ -692,6 +745,7 @@ function startBattle(nodeIndex) {
     isLocked = false;
     generateQuestion();
 }
+
 
 function backToMap() {
     if (isLocked) return;
