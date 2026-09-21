@@ -381,33 +381,43 @@ body {
     background-position: center center;
     min-height: 0;
     margin-bottom: 4px;
-    position: relative; /* 右下の運転士画像の配置基準 */
+    position: relative;
 }
 
-/* プレビュー右下に配置する運転士の顔画像スタイル */
-#character-preview-pilot {
-    position: absolute;
-    right: 4px;
-    bottom: 4px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background-size: cover;
-    background-position: center;
-    border: 2px solid #fff;
-    box-shadow: 0 0 10px rgba(0,0,0,0.7);
-    display: none;
+/* ▼ テキストと顔画像を横並びにする行（追加・修正部分） */
+#character-preview-bottom-row {
+    width: 100%;
+    flex: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 0;
 }
 
 #character-preview-info {
-    width: 100%;
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
     min-height: 0;
+    overflow: hidden;
 }
+
+/* ▼ プレビュー右側に配置する運転士の顔画像スタイル（四角・角丸に変更） */
+#character-preview-pilot {
+    width: 72px;
+    height: 72px;
+    border-radius: 8px;     /* 四角（角丸） */
+    background-size: cover;
+    background-position: center;
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.7);
+    flex-shrink: 0;
+    display: none;          /* JS側で表示制御 */
+    background-color: #000;
+}
+
 .preview-label {
     display: none;
 }
