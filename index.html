@@ -62,22 +62,20 @@
             
             <!-- 選択されたキャラクターのプレビューエリア（プロフィール詳細＆運転士顔画像対応） -->
             <div id="character-preview-area">
-                <div id="character-preview-img">
-                    <div id="character-preview-pilot"></div>
-                </div>
-                <div id="character-preview-info">
-                    <div id="character-preview-name">-</div>
-                    <div class="profile-row"><span class="p-label">そうび</span><span class="p-colon">：</span><span id="profile-soubi">-</span></div>
-                    <div class="profile-row"><span class="p-label">ひっさつわざ</span><span class="p-colon">：</span><span id="profile-hissatsu">-</span></div>
-                    <div class="profile-row"><span class="p-label">うんてんし</span><span class="p-colon">：</span><span id="profile-untenshi">-</span></div>
-                </div>
-            </div>
-
-            <!-- 一番下に配置する「しゅつげき」ボタン -->
-            <button id="sortie-btn" onclick="closeShireishitsu()">しゅつげき</button>
-        </div>
-    </div>
-
+               <div id="character-preview-img"></div>
+    
+  　　　　  <!-- ▼ 下部を横並びにするためのコンテナ（またはflexレイアウト） -->
+　　　　    <div id="character-preview-bottom-row">
+    　　　　    <div id="character-preview-info">
+   　　　　         <div id="character-preview-name">Ｅ５はやぶさトレーラーフォーム</div>
+   　　　　         <div class="profile-row"><span class="p-label">そうび</span><span class="p-colon">:</span>リクソウセイバー</div>
+   　　　　         <div class="profile-row"><span class="p-label">ひっさつわざ</span><span class="p-colon">:</span>グランクロス</div>
+   　　　　         <div class="profile-row"><span class="p-label">うんてんし</span><span class="p-colon">:</span>大成 タイセイ</div>
+    　　　　    </div>
+　　　　        <!-- ▼ 黄色い四角の位置に配置する顔画像 -->
+ 　　　　       <div id="character-preview-pilot"></div>
+　　　　    </div>
+　　　　　</div>
     <!-- ③ バトル画面 -->
     <div id="screen-battle" class="screen" style="display:none;">
         <div id="ui-panel-left">
