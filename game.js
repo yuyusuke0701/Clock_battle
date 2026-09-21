@@ -179,6 +179,23 @@ const SHINKALION_PROFILES = {
     "zero": { name: "シンカリオン ０", soubi: "ゼロブレード", hissatsu: "—", untenshi: "工部 レイジ" }
 };
 
+/* ===================================================================
+    シンカリオン・運転士の対応データ
+================================================================== */
+const PILOT_IMAGES = {
+    "500kodama": "Images/CW/yamato_up.png",
+    "e5hayabusa": "Images/CW/taisei_up.png",
+    "e6komachi": "Images/CW/akane_up.png",
+    "e7kagayaki": "Images/CW/ryota_up.png",
+    "e8tsubasa": "images/CW_char/ganma_up.png",
+    "h5hayabusa": "Images/CW/shion_up.png",
+    "n700skamome": "Images/CW/tsukumo_up.png",
+    "n700snozomi": "Images/CW/ten_up.png",
+    "srg": "Images/CW/3pilots.jpg",
+    "yellow": "Images/CW/morito_up.png",
+    "zero": "Images/CW/reiji_up.png"
+};
+
 const NORMAL_ENEMY_IMAGES_1_5 = [
     'Images/CW/敵1.png',
     'Images/CW/敵2.png',
@@ -224,6 +241,7 @@ if (!progress.visitedStages) progress.visitedStages = {};
 let currentScreen = 'top';
 let currentStageId = progress.unlockedStage;
 let pendingNodeIndex = null;
+
 /* ===================================================================
     画面切り替え
 ================================================================== */
@@ -401,6 +419,7 @@ function closeShireishitsu() {
 function updateCharacterPreview(charKey) {
     const profile = SHINKALION_PROFILES[charKey];
     const previewImg = document.getElementById('character-preview-img');
+    const previewPilot = document.getElementById('character-preview-pilot');
     const previewName = document.getElementById('character-preview-name');
     const soubiEl = document.getElementById('profile-soubi');
     const hissatsuEl = document.getElementById('profile-hissatsu');
@@ -410,6 +429,17 @@ function updateCharacterPreview(charKey) {
 
     if (previewImg) {
         previewImg.style.backgroundImage = "url('" + charDef.img + "')";
+    }
+
+    // プレビュー右下に対応する運転士の顔画像を設定
+    if (previewPilot) {
+        const pilotImg = PILOT_IMAGES[charKey] || '';
+        if (pilotImg) {
+            previewPilot.style.backgroundImage = "url('" + pilotImg + "')";
+            previewPilot.style.display = 'block';
+        } else {
+            previewPilot.style.display = 'none';
+        }
     }
 
     if (profile) {
@@ -645,26 +675,6 @@ function checkAnswer() {
         handleWrong();
     }
 }
-/* ===================================================================
-    ローディング画面の制御
-================================================================== */
-function showLoading(text) {
-    const overlay = document.getElementById('loading-overlay');
-    const textEl = document.getElementById('loading-text');
-    if (textEl && text) {
-        textEl.innerText = text;
-    }
-    if (overlay) {
-        overlay.style.display = 'flex';
-    }
-}
-
-function hideLoading() {
-    const overlay = document.getElementById('loading-overlay');
-    if (overlay) {
-        overlay.style.display = 'none';
-    }
-}
 
 /* ===================================================================
     ローディング画面の制御
@@ -691,7 +701,6 @@ function hideLoading() {
     バトル開始処理 ＆ 画像ローディング対応
 ================================================================== */
 function startBattle(nodeIndex) {
-    // 1. バトル準備中のローディングを表示
     showLoading("バトルじゅんび中...");
 
     const isBoss = nodeIndex === 5;
@@ -708,14 +717,14 @@ function startBattle(nodeIndex) {
         loadedCount++;
         if (loadedCount >= imagesToLoad.length) {
             executeActualBattleStart(nodeIndex);
-            hideLoading(); // すべての読み込みが完了したらローディングを隠す
+            hideLoading();
         }
     }
 
     imagesToLoad.forEach(path => {
         const img = new Image();
         img.onload = checkAllImagesLoaded;
-        img.onerror = checkAllImagesLoaded; // エラー時もフリーズしないように進める
+        img.onerror = checkAllImagesLoaded;
         img.src = path;
     });
 }
