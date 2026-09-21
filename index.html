@@ -61,21 +61,25 @@
             <div id="character-grid"></div>
             
             <!-- 選択されたキャラクターのプレビューエリア（プロフィール詳細＆運転士顔画像対応） -->
-            <div id="character-preview-area">
-               <div id="character-preview-img"></div>
+
+<div id="character-preview-area">
+    <!-- シンカリオンのプレビュー画像 -->
+    <div id="character-preview-img"></div>
     
-  　　　　  <!-- ▼ 下部を横並びにするためのコンテナ（またはflexレイアウト） -->
-　　　　    <div id="character-preview-bottom-row">
-    　　　　    <div id="character-preview-info">
-   　　　　         <div id="character-preview-name">Ｅ５はやぶさトレーラーフォーム</div>
-   　　　　         <div class="profile-row"><span class="p-label">そうび</span><span class="p-colon">:</span>リクソウセイバー</div>
-   　　　　         <div class="profile-row"><span class="p-label">ひっさつわざ</span><span class="p-colon">:</span>グランクロス</div>
-   　　　　         <div class="profile-row"><span class="p-label">うんてんし</span><span class="p-colon">:</span>大成 タイセイ</div>
-    　　　　    </div>
-　　　　        <!-- ▼ 黄色い四角の位置に配置する顔画像 -->
- 　　　　       <div id="character-preview-pilot"></div>
-　　　　    </div>
-　　　　　</div>
+    <!-- テキスト情報エリア（幅いっぱいに表示） -->
+    <div id="character-preview-info">
+        <div id="character-preview-name">機体名</div>
+        <div class="profile-row"><span class="p-label">そうび</span><span class="p-colon">:</span>...</div>
+        <div class="profile-row"><span class="p-label">ひっさつ</span><span class="p-colon">:</span>...</div>
+        <div class="profile-row"><span class="p-label">うんてんし</span><span class="p-colon">:</span>...</div>
+    </div>
+
+    <!-- プレビューエリア内の右下に重ねて配置する運転士の顔画像 -->
+    <div id="character-preview-pilot"></div>
+</div>
+
+
+            
     <!-- ③ バトル画面 -->
     <div id="screen-battle" class="screen" style="display:none;">
         <div id="ui-panel-left">
