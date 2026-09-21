@@ -187,7 +187,7 @@ const PILOT_IMAGES = {
     "e5hayabusa": "Images/CW/taisei_up.png",
     "e6komachi": "Images/CW/akane_up.png",
     "e7kagayaki": "Images/CW/ryota_up.png",
-    "e8tsubasa": "images/CW_char/ganma_up.png",
+    "e8tsubasa": "Images/CW_char/ganma_up.png",
     "h5hayabusa": "Images/CW/shion_up.png",
     "n700skamome": "Images/CW/tsukumo_up.png",
     "n700snozomi": "Images/CW/ten_up.png",
