@@ -165,18 +165,18 @@ const CHARACTERS = [
 ];
 
 const SHINKALION_PROFILES = {
-    "500kodama": { name: "５００こだまジンキフォーム", soubi: "ダイナミックギガスパナ", hissatsu: "—", untenshi: "西大路 ヤマト" },
-    "e5hayabusa": { name: "Ｅ５はやぶさトレーラーフォーム", soubi: "リクソウセイバー", hissatsu: "グランクロス", untenshi: "大成 タイセイ" },
-    "e6komachi": { name: "Ｅ６こまちトップリフターフォー", soubi: "キンテイガン", hissatsu: "ツイストロックバスター", untenshi: "フォールデンアカネ" },
-    "e7kagayaki": { name: "Ｅ７かがやきドリルフォーム", soubi: "クッサクバンパー", hissatsu: "ツインクッサクドリル", untenshi: "九頭竜 リョータ" },
-    "e8tsubasa": { name: "Ｅ８つばさドローンフォーム", soubi: "ホーネットライフル", hissatsu: "—", untenshi: "最上 ガンマ" },
-    "h5hayabusa": { name: "Ｈ５はやぶさドーザーフォーム", soubi: "ドーザーハイドアーム", hissatsu: "—", untenshi: "五稜郭 シオン" },
-    "n700skamome": { name: "Ｎ７００Ｓかもめフェリーフォー", soubi: "サンドウカトラス", hissatsu: "—", untenshi: "海風 ツクモ" },
-    "n700snozomi": { name: "Ｎ７００Ｓのぞみブルートレーラ", soubi: "リクソウブレード", hissatsu: "—", untenshi: "魚虎 テン" },
-    "phantom": { name: "ファントムシンカリオン", soubi: "ファントムガントレットソード", hissatsu: "—", untenshi: "大成 イナ" },
-    "srg": { name: "シンカリオンＳＲＧ", soubi: "—", hissatsu: "—", untenshi: "タイセイ・アカネ・リョータ" },
-    "yellow": { name: "グレートドクターイエロー", soubi: "グレートケンソクブレード", hissatsu: "—", untenshi: "梔子 モリット" },
-    "zero": { name: "シンカリオン ０", soubi: "ゼロブレード", hissatsu: "—", untenshi: "工部 レイジ" }
+    "500kodama": { name: "５００こだまジンキフォーム", soubi: "ダイナミックギガスパナ", untenshi: "西大路 ヤマト" },
+    "e5hayabusa": { name: "Ｅ５はやぶさトレーラーフォーム", soubi: "リクソウセイバー", untenshi: "大成 タイセイ" },
+    "e6komachi": { name: "Ｅ６こまちトップリフターフォーム", soubi: "キンテイガン", untenshi: "フォールデンアカネ" },
+    "e7kagayaki": { name: "Ｅ７かがやきドリルフォーム", soubi: "クッサクバンパー", untenshi: "九頭竜 リョータ" },
+    "e8tsubasa": { name: "Ｅ８つばさドローンフォーム", soubi: "ホーネットライフル", untenshi: "最上 ガンマ" },
+    "h5hayabusa": { name: "Ｈ５はやぶさドーザーフォーム", soubi: "ドーザーハイドアーム", untenshi: "五稜郭 シオン" },
+    "n700skamome": { name: "Ｎ７００Ｓかもめフェリーフォーム", soubi: "サンドウカトラス", untenshi: "海風 ツクモ" },
+    "n700snozomi": { name: "Ｎ７００Ｓのぞみブルートレーラーフォーム", soubi: "リクソウブレード", untenshi: "魚虎 テン" },
+    "phantom": { name: "ファントムシンカリオン", soubi: "ファントムガントレットソード", untenshi: "大成 イナ" },
+    "srg": { name: "シンカリオンＳＲＧ", soubi: "SRGリクソウセイバー", untenshi: "タイセイ・アカネ・リョータ" },
+    "yellow": { name: "グレートドクターイエロー", soubi: "グレートケンソクブレード", untenshi: "梔子 モリト" },
+    "zero": { name: "シンカリオン ０", soubi: "ゼロブレード", untenshi: "工部 レイジ" }
 };
 
 /* ===================================================================
@@ -187,7 +187,7 @@ const PILOT_IMAGES = {
     "e5hayabusa": "Images/CW/taisei_up.png",
     "e6komachi": "Images/CW/akane_up.png",
     "e7kagayaki": "Images/CW/ryota_up.png",
-    "e8tsubasa": "Images/CW_char/ganma_up.png",
+    "e8tsubasa": "Images/CW/ganma_up.png",
     "h5hayabusa": "Images/CW/shion_up.png",
     "n700skamome": "Images/CW/tsukumo_up.png",
     "n700snozomi": "Images/CW/ten_up.png",
