@@ -357,8 +357,9 @@ body {
     flex-shrink: 0;
 }
 
-/* 下部プレビューエリア */
+/* 下部プレビューエリア（相対配置にして子要素の絶対配置を基準化） */
 #character-preview-area {
+    position: relative;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -384,30 +385,26 @@ body {
     position: relative;
 }
 
-/* ▼ テキストと顔画像を横並びにする行（追加・修正部分） */
-#character-preview-bottom-row {
+/* ▼ テキスト情報の配置エリア（横幅いっぱいにテキストを表示） */
+#character-preview-info {
     width: 100%;
     flex: 1.2;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 0;
-}
-
-#character-preview-info {
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
     min-height: 0;
     overflow: hidden;
+    padding-right: 75px; /* 右下の顔画像と被らないように余白を確保 */
 }
 
-/* ▼ プレビュー右側に配置する運転士の顔画像スタイル（四角・角丸に変更） */
+/* ▼ プレビューエリア内の右下に配置する運転士の顔画像（四角・角丸・前面表示） */
 #character-preview-pilot {
-    width: 72px;
-    height: 72px;
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    width: 68px;
+    height: 68px;
     border-radius: 8px;     /* 四角（角丸） */
     background-size: cover;
     background-position: center;
@@ -416,6 +413,7 @@ body {
     flex-shrink: 0;
     display: none;          /* JS側で表示制御 */
     background-color: #000;
+    z-index: 10;            /* 前面表示 */
 }
 
 .preview-label {
