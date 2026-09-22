@@ -388,11 +388,13 @@ function renderMap() {
         mapScreen.style.backgroundImage = "url('" + stage.bg + "')";
     }
     
-    const navLabel = document.getElementById('stage-nav-label');
+    // 修正: HTML側のID 'stage-title' に合わせました
+    const navLabel = document.getElementById('stage-title');
     if (navLabel) navLabel.innerText = 'ステージ ' + currentStageId;
 
-    const prevArr = document.getElementById('prev-arrow');
-    const nextArr = document.getElementById('next-arrow');
+    // 修正: HTML側のID 'prev-stage' / 'next-stage' に合わせました
+    const prevArr = document.getElementById('prev-stage');
+    const nextArr = document.getElementById('next-stage');
     if (prevArr) prevArr.classList.toggle('disabled', currentStageId <= 1);
     if (nextArr) nextArr.classList.toggle('disabled', currentStageId >= progress.unlockedStage);
 
@@ -496,8 +498,8 @@ function updateCharacterPreview(charKey) {
     const previewImg = document.getElementById('character-preview-img');
     const previewPilot = document.getElementById('character-preview-pilot');
     const previewName = document.getElementById('character-preview-name');
-    const soubiEl = document.getElementById('profile-soubi');
-    const untenshiEl = document.getElementById('profile-untenshi');
+    const soubiEl = document.getElementById('p-val-mecha');
+    const untenshiEl = document.getElementById('p-val-cv');
 
     const charDef = CHARACTERS.find(c => c.id === charKey) || CHARACTERS[0];
 
@@ -636,8 +638,9 @@ function startCriticalTimer() {
 }
 
 function renderHP() {
-    const playerBar = document.getElementById('player-hp');
-    const enemyBar = document.getElementById('enemy-hp');
+    // 修正: HTML側のID 'player-hp-bar' と 'enemy-hp-bar' に合わせました
+    const playerBar = document.getElementById('player-hp-bar');
+    const enemyBar = document.getElementById('enemy-hp-bar');
 
     if (playerBar) {
         playerBar.innerHTML = '';
@@ -696,7 +699,8 @@ function showMessage(text, duration) {
 }
 
 function drawClockHands(hour, minute) {
-    const canvas = document.getElementById('handCanvas');
+    // 修正: HTML側のID 'hand-canvas' に合わせました
+    const canvas = document.getElementById('hand-canvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const cx = 165;
@@ -760,7 +764,8 @@ function changeHour(delta) {
     currentHour += delta;
     if (currentHour > 12) currentHour = 1;
     if (currentHour < 1) currentHour = 12;
-    const hDisp = document.getElementById('hour-display');
+    // 修正: HTML側のID 'display-hour' に合わせました
+    const hDisp = document.getElementById('display-hour');
     if (hDisp) hDisp.innerText = String(currentHour).padStart(2, '0');
 }
 
@@ -768,7 +773,8 @@ function changeMinute() {
     if (isLocked) return;
     playSfx('select');
     currentMinute = currentMinute === 0 ? 30 : 0;
-    const mDisp = document.getElementById('minute-display');
+    // 修正: HTML側のID 'display-min' に合わせました
+    const mDisp = document.getElementById('display-min');
     if (mDisp) mDisp.innerText = String(currentMinute).padStart(2, '0');
 }
 
@@ -874,11 +880,6 @@ function executeActualBattleStart(nodeIndex) {
     enemyHP = enemyMaxHp;
     renderHP();
 
-    const stageText = document.getElementById('stage-text');
-    if (stageText) {
-        stageText.innerText = isBoss ? ('ステージ' + currentStageId + ' ボス') : ('ステージ' + currentStageId + '-' + (nodeIndex + 1));
-    }
-
     isLocked = false;
     generateQuestion();
 
@@ -967,7 +968,8 @@ function executeAttackAfterCutin(damage) {
         isLocked = true;
         playSfx('correct');
         score++;
-        const scoreText = document.getElementById('score-text');
+        // 修正: HTML側のID 'score-badge' に合わせました
+        const scoreText = document.getElementById('score-badge');
         if (scoreText) scoreText.innerText = "たおしたてき: " + score;
 
         showPilotSpeech('win', 2000);
@@ -1034,9 +1036,33 @@ function handleWrong() {
 }
 
 /* ===================================================================
-    初期化
+    初期化 ＆ イベントリスナーの自動紐付け
 ================================================================== */
 window.onload = function() {
     fitGame();
     showScreen('top');
+
+    // 各種ボタンのイベントリスナー（クリック時の処理）を登録
+    const bindClick = (id, handler) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', handler);
+    };
+
+    bindClick('start-btn', startGame);
+    bindClick('sound-toggle', toggleSound);
+    bindClick('prev-stage', prevStage);
+    bindClick('next-stage', nextStage);
+    bindClick('menu-btn', openMenu);
+    bindClick('menu-close', closeMenu);
+    bindClick('shireishitsu-back', closeShireishitsu);
+    bindClick('node-popup-battle', confirmBattleStart);
+    bindClick('node-popup-close', closeNodePopup);
+
+    bindClick('hour-up', () => changeHour(1));
+    bindClick('hour-down', () => changeHour(-1));
+    bindClick('min-up10', changeMinute);
+    bindClick('min-down10', changeMinute);
+
+    bindClick('decide-btn', checkAnswer);
+    bindClick('back-to-map-btn', backToMap);
 };
