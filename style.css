@@ -909,27 +909,40 @@ body {
 }
 
 /* ==========================================================
-   バトル中運転士吹き出し用スタイル (追加)
+   バトル中：画面中央の吹き出しポップアップ演出
    ========================================================== */
 #battle-speech-overlay {
     position: absolute;
-    bottom: 140px;
-    left: 15px;
-    right: 15px;
-    display: flex;
-    align-items: flex-end;
-    gap: 10px;
-    z-index: 120;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    width: 86%;
+    max-width: 380px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 3px solid #38bdf8;
+    border-radius: 20px;
+    padding: 16px;
+    display: none; /* JSで "show" クラスを付与して表示 */
+    align-items: center;
+    gap: 14px;
+    z-index: 150;
+    box-shadow: 0 0 30px rgba(56, 189, 248, 0.6), 0 8px 20px rgba(0,0,0,0.7);
     pointer-events: none;
-    display: none; /* JSで表示制御 */
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 }
+
 #battle-speech-overlay.show {
     display: flex;
-    animation: fadeInSpeech 0.2s ease forwards;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    animation: popSpeechCenter 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
 }
-@keyframes fadeInSpeech {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+
+@keyframes popSpeechCenter {
+    0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+    70% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
 #battle-speech-pilot {
@@ -937,36 +950,40 @@ body {
     height: 64px;
     background: #000;
     border: 2px solid #fff;
-    border-radius: 12px;
+    border-radius: 50%;
     flex-shrink: 0;
     background-size: cover;
     background-position: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+    box-shadow: 0 0 12px rgba(56,189,248,0.8);
 }
 
 #battle-speech-bubble {
-    background: rgba(255, 255, 255, 0.95);
+    background: #fff;
     color: #111;
     padding: 10px 14px;
     border-radius: 14px;
-    font-size: 14px;
-    font-weight: bold;
-    line-height: 1.4;
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 1.3;
     flex: 1;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
     position: relative;
-    border: 2px solid #38bdf8;
-    text-shadow: none;
+    text-align: center;
+    white-space: nowrap; /* 改行を防ぎ、1行で収める */
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* 吹き出しのしっぽ（左側の顔に向かって配置する場合） */
 #battle-speech-bubble::before {
     content: '';
     position: absolute;
-    bottom: 12px;
-    left: -9px;
-    border-width: 6px 10px 6px 0;
+    top: 50%;
+    left: -8px;
+    transform: translateY(-50%);
+    border-width: 7px 9px 7px 0;
     border-style: solid;
-    border-color: transparent rgba(255, 255, 255, 0.95) transparent transparent;
+    border-color: transparent #fff transparent transparent;
     display: block;
     width: 0;
 }
