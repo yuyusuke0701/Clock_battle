@@ -128,7 +128,7 @@ function toggleSound() {
 }
 
 /* ===================================================================
-    ゲームデータ ＆ キャラクタープロフィール
+    ゲームデータ ＆ キャラクタープロフィール（ひっさつ項目削除済み）
 ================================================================== */
 const STAGES = [
     { id: 1, bg: 'Images/stage/map01_メタバース空間.png' },
@@ -180,8 +180,83 @@ const SHINKALION_PROFILES = {
 };
 
 /* ===================================================================
-    シンカリオン・運転士の対応データ
+    運転士ごとのバトルセリフ定義（意気込み・クリティカル・勝利・敗北）
 ================================================================== */
+const PILOT_MESSAGES = {
+    "500kodama": {
+        start: "こだまの機動力を見せてやるぜ！",
+        critical: "ダイナミックにいこうぜ！",
+        win: "やったな！完璧なタイミングだ！",
+        lose: "くそっ、時間合わせに遅れたか…！"
+    },
+    "e5hayabusa": {
+        start: "よし、みんなの力を合わせて正確に合わせるぞ！",
+        critical: "シンカリオンのパワー、全開だ！",
+        win: "やったぜ！時間バッチリだね！",
+        lose: "くそっ、時間合わせが間に合わなかったか…！"
+    },
+    "e6komachi": {
+        start: "正確な時刻合わせね、任せてちょうだい！",
+        critical: "一気に決めるわよ！",
+        win: "当然の結果ね！お疲れさま！",
+        lose: "嘘…時間がずれてしまったわ…"
+    },
+    "e7kagayaki": {
+        start: "パワー全開で時計を合わせるぜ！",
+        critical: "くらえ、渾身の一撃だ！",
+        win: "っしゃあ！大勝利だぜ！",
+        lose: "うおっ、タイミングが合わねえ…！"
+    },
+    "e8tsubasa": {
+        start: "空中機動のように素早く合わせるよ！",
+        critical: "ロックオン、完璧だ！",
+        win: "勝ったね！いいペースだったよ！",
+        lose: "ぐぬぬ、隙を突かれたか…"
+    },
+    "h5hayabusa": {
+        start: "北の大地から、正確に時間を刻むわ！",
+        critical: "冷徹に、確実に仕留める！",
+        win: "作戦成功よ、お見事ね。",
+        lose: "計算が狂ったというの…？"
+    },
+    "n700skamome": {
+        start: "かもめのように軽快にいこう！",
+        critical: "波に乗ってきたよ！",
+        win: "大成功だね！やったぁ！",
+        lose: "あわわ、時計の針が追いつかないよ…！"
+    },
+    "n700snozomi": {
+        start: "のぞみのごとく、素早く正確に！",
+        critical: "最高速度で突撃する！",
+        win: "素晴らしい成果だね。",
+        lose: "引き離されたか、悔しいな…！"
+    },
+    "yellow": {
+        start: "ドクターイエローの検測、開始する！",
+        critical: "完璧なデータだ、もらった！",
+        win: "検測完了、異常なし！",
+        lose: "データに誤差が生じたか…！"
+    },
+    "srg": {
+        start: "3人の力を合わせれば、どんな時間も完璧だ！",
+        critical: "トリプルパワー炸裂だ！",
+        win: "やったぞ！最高のチームワークだ！",
+        lose: "みんな、慌てず立て直すんだ…！"
+    },
+    "phantom": {
+        start: "闇を切り裂き、時を支配する…！",
+        critical: "消え去るがいい！",
+        win: "我が勝利に曇りなし…！",
+        lose: "この私が敗れるとは…許さんぞ！"
+    },
+    "zero": {
+        start: "すべての原点、その力を見せよう。",
+        critical: "零の衝撃を味わえ！",
+        win: "これが原点の力だ。",
+        lose: "まだ終わらんよ…"
+    }
+};
+
 const PILOT_IMAGES = {
     "500kodama": "Images/CW/yamato_up.png",
     "e5hayabusa": "Images/CW/taisei_up.png",
@@ -422,7 +497,6 @@ function updateCharacterPreview(charKey) {
     const previewPilot = document.getElementById('character-preview-pilot');
     const previewName = document.getElementById('character-preview-name');
     const soubiEl = document.getElementById('profile-soubi');
-    const hissatsuEl = document.getElementById('profile-hissatsu');
     const untenshiEl = document.getElementById('profile-untenshi');
 
     const charDef = CHARACTERS.find(c => c.id === charKey) || CHARACTERS[0];
@@ -431,7 +505,6 @@ function updateCharacterPreview(charKey) {
         previewImg.style.backgroundImage = "url('" + charDef.img + "')";
     }
 
-    // プレビュー右下に対応する運転士の顔画像を設定
     if (previewPilot) {
         const pilotImg = PILOT_IMAGES[charKey] || '';
         if (pilotImg) {
@@ -445,12 +518,10 @@ function updateCharacterPreview(charKey) {
     if (profile) {
         if (previewName) previewName.innerText = profile.name;
         if (soubiEl) soubiEl.innerText = profile.soubi;
-        if (hissatsuEl) hissatsuEl.innerText = profile.hissatsu;
         if (untenshiEl) untenshiEl.innerText = profile.untenshi;
     } else {
         if (previewName) previewName.innerText = charDef.name;
         if (soubiEl) soubiEl.innerText = "—";
-        if (hissatsuEl) hissatsuEl.innerText = "—";
         if (untenshiEl) untenshiEl.innerText = "—";
     }
 }
@@ -481,7 +552,7 @@ function renderShireishitsu() {
 }
 
 /* ===================================================================
-    バトル画面 ＆ クリティカル機能
+    バトル画面 ＆ 運転士吹き出し・クリティカル機能
 ================================================================== */
 let currentHour = 3;
 let currentMinute = 0;
@@ -499,6 +570,38 @@ let enemyMaxHp = ENEMY_MAX_HP;
 let criticalTimer = null;
 let timeLeft = 10;
 const MAX_TIME = 10;
+
+function showPilotSpeech(type, durationMs = 3000) {
+    const speechEl = document.getElementById('battle-pilot-speech');
+    const faceEl = document.getElementById('battle-pilot-face');
+    const bubbleEl = document.getElementById('battle-pilot-bubble');
+    if (!speechEl || !faceEl || !bubbleEl) return;
+
+    const charKey = progress.selectedCharacter;
+    const pilotImg = PILOT_IMAGES[charKey] || '';
+    const messages = PILOT_MESSAGES[charKey] || PILOT_MESSAGES['e5hayabusa'];
+    const text = messages[type] || messages.start;
+
+    faceEl.style.backgroundImage = "url('" + pilotImg + "')";
+    bubbleEl.innerText = text;
+
+    speechEl.classList.add('show');
+    clearTimeout(speechEl._hideTimer);
+    
+    if (durationMs > 0) {
+        speechEl._hideTimer = setTimeout(() => {
+            speechEl.classList.remove('show');
+        }, durationMs);
+    }
+}
+
+function hidePilotSpeech() {
+    const speechEl = document.getElementById('battle-pilot-speech');
+    if (speechEl) {
+        clearTimeout(speechEl._hideTimer);
+        speechEl.classList.remove('show');
+    }
+}
 
 function startCriticalTimer() {
     clearInterval(criticalTimer);
@@ -774,11 +877,15 @@ function executeActualBattleStart(nodeIndex) {
 
     isLocked = false;
     generateQuestion();
+
+    // バトル開始時の意気込みコメントを表示
+    showPilotSpeech('start', 3500);
 }
 
 function backToMap() {
     if (isLocked) return;
     playSfx('select');
+    hidePilotSpeech();
     enterMap(false);
 }
 
@@ -798,6 +905,7 @@ function handleCorrect() {
     const damage = isCritical ? 2 : 1;
 
     if (isCritical) {
+        showPilotSpeech('critical', 2500);
         showCriticalCutin(() => {
             executeAttackAfterCutin(damage);
         });
@@ -851,12 +959,14 @@ function executeAttackAfterCutin(damage) {
             return;
         }
 
+        // 勝利時
         isLocked = true;
         playSfx('correct');
         score++;
         const scoreText = document.getElementById('score-text');
         if (scoreText) scoreText.innerText = "たおしたてき: " + score;
 
+        showPilotSpeech('win', 2500);
         showMessage("てきを たおした！", 2000);
 
         const enemy = document.getElementById('enemy');
@@ -876,6 +986,7 @@ function executeAttackAfterCutin(damage) {
         setTimeout(() => {
             if (player) player.style.transform = "none";
             onNodeCleared();
+            hidePilotSpeech();
             enterMap(true);
             isLocked = false;
         }, 2000);
@@ -906,9 +1017,12 @@ function handleWrong() {
             return;
         }
 
+        // 敗北時
         isLocked = true;
+        showPilotSpeech('lose', 2500);
         showMessage("ゲームオーバー！", 1800);
         setTimeout(() => {
+            hidePilotSpeech();
             enterMap(true);
             isLocked = false;
         }, 1800);
