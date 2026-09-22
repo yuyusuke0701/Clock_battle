@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=7">
+    <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 
@@ -65,11 +65,10 @@
                 <!-- シンカリオンのプレビュー画像 -->
                 <div id="character-preview-img"></div>
                 
-                <!-- テキスト情報エリア -->
+                <!-- テキスト情報エリア（ひっさつ行を削除） -->
                 <div id="character-preview-info">
                     <div id="character-preview-name">機体名</div>
                     <div class="profile-row"><span class="p-label">そうび</span><span class="p-colon">:</span><span id="profile-soubi"></span></div>
-                    <div class="profile-row"><span class="p-label">ひっさつ</span><span class="p-colon">:</span><span id="profile-hissatsu"></span></div>
                     <div class="profile-row"><span class="p-label">うんてんし</span><span class="p-colon">:</span><span id="profile-untenshi"></span></div>
                 </div>
 
@@ -101,6 +100,12 @@
         </div>
 
         <div id="message-overlay">ステージクリア！</div>
+
+        <!-- バトル中の運転士吹き出し演出 -->
+        <div id="battle-pilot-speech">
+            <div id="battle-pilot-face"></div>
+            <div id="battle-pilot-bubble" class="battle-speech-bubble"></div>
+        </div>
 
         <div id="clock-area">
             <div id="clock-face">
@@ -158,7 +163,7 @@
     </div>
 </div>
 
-<script src="game.js?v=7"></script>
+<script src="game.js?v=8"></script>
 
 </body>
 </html>
