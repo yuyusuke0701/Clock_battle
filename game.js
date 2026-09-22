@@ -128,7 +128,7 @@ function toggleSound() {
 }
 
 /* ===================================================================
-    ゲームデータ ＆ キャラクタープロフィール（ひっさつ項目削除済み）
+    ゲームデータ ＆ キャラクタープロフィール
 ================================================================== */
 const STAGES = [
     { id: 1, bg: 'Images/stage/map01_メタバース空間.png' },
@@ -180,7 +180,7 @@ const SHINKALION_PROFILES = {
 };
 
 /* ===================================================================
-    運転士ごとのバトルセリフ定義（意気込み・クリティカル・勝利・敗北）
+    運転士ごとのバトルセリフ定義
 ================================================================== */
 const PILOT_MESSAGES = {
     "500kodama": {
@@ -583,14 +583,17 @@ function showPilotSpeech(type, durationMs = 3000) {
     const text = messages[type] || messages.start;
 
     faceEl.style.backgroundImage = "url('" + pilotImg + "')";
+    faceEl.style.display = 'block';
     bubbleEl.innerText = text;
 
+    speechEl.style.display = 'flex';
     speechEl.classList.add('show');
     clearTimeout(speechEl._hideTimer);
     
     if (durationMs > 0) {
         speechEl._hideTimer = setTimeout(() => {
             speechEl.classList.remove('show');
+            speechEl.style.display = 'none';
         }, durationMs);
     }
 }
@@ -600,6 +603,7 @@ function hidePilotSpeech() {
     if (speechEl) {
         clearTimeout(speechEl._hideTimer);
         speechEl.classList.remove('show');
+        speechEl.style.display = 'none';
     }
 }
 
