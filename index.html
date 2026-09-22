@@ -4,153 +4,161 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>シンカリオン とけいマスター！</title>
-    <!-- 外部のCSSファイルを正しく読み込みます -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
-    <div id="game-container">
-        <!-- 音声トグルボタン -->
-        <button id="sound-toggle">🔊</button>
 
-        <!-- ① TOP画面 -->
-        <div id="screen-top" class="screen">
-            <button id="start-btn">スタート</button>
+<div id="game-container">
+    <button id="sound-toggle" onclick="toggleSound()">🔊</button>
+
+    <!-- ① TOP画面 -->
+    <div id="screen-top" class="screen">
+        <button id="start-btn" onclick="startGame()">START</button>
+    </div>
+
+    <!-- ② マップ画面 -->
+    <div id="screen-map" class="screen" style="display:none;">
+        <div id="stage-nav">
+            <button class="nav-arrow" id="prev-arrow" onclick="prevStage()">◀</button>
+            <div id="stage-nav-label">ステージ 1</div>
+            <button class="nav-arrow" id="next-arrow" onclick="nextStage()">▶</button>
         </div>
+        <button id="menu-btn" onclick="openMenu()">☰ メニュー</button>
+        <div id="map-nodes"></div>
+        <div id="map-toast"></div>
+        <div id="stage-intro"><div id="stage-intro-text">ステージ 1</div></div>
+    </div>
 
-        <!-- ② マップ画面 -->
-        <div id="screen-map" class="screen" style="display: none;">
-            <div id="stage-nav">
-                <button class="nav-arrow" id="prev-stage">&lt;</button>
-                <span id="stage-title">ステージ 1</span>
-                <button class="nav-arrow" id="next-stage">&gt;</button>
-            </div>
-            <button id="menu-btn">メニュー</button>
-            <div id="map-nodes"></div>
-            <div id="map-toast"></div>
-            <div id="stage-intro">
-                <div id="stage-intro-text"></div>
-            </div>
+    <!-- ノード確認ポップアップ -->
+    <div id="node-popup">
+        <div class="popup-box">
+            <h2 id="node-popup-title">バトルポイント 1</h2>
+            <button class="btn-primary" onclick="confirmBattleStart()">⚔ バトルスタート</button>
+            <button class="btn-secondary" onclick="closeNodePopup()">とじる</button>
         </div>
+    </div>
 
-        <!-- 司令室画面 (キャラクター選択) -->
-        <div id="shireishitsu-overlay">
-            <div id="shireishitsu-box">
-                <div id="commander-intro">
-                    <div id="commander-face"></div>
-                    <div class="speech-bubble">出撃するシンカリオンと運転士を選んでくれ！</div>
-                </div>
-                <div id="character-grid"></div>
-                <div id="character-preview-area">
-                    <div id="character-preview-img"></div>
-                    <div id="character-preview-info">
-                        <div id="character-preview-name">キャラ名</div>
-                        <div class="profile-row"><span class="p-label">機体</span><span class="p-colon">:</span><span id="p-val-mecha">--</span></div>
-                        <div class="profile-row"><span class="p-label">しんぶん</span><span class="p-colon">:</span><span id="p-val-cv">--</span></div>
-                    </div>
-                    <div id="character-preview-pilot"></div>
-                </div>
-                <button id="sortie-btn">しゅつげきする</button>
-                <button class="back-btn" id="shireishitsu-back">もどる</button>
-            </div>
+    <!-- メニュー -->
+    <div id="menu-overlay">
+        <div class="popup-box">
+            <h2>メニュー</h2>
+            <button class="btn-primary" onclick="openShireishitsu()">しれいしつ</button>
+            <button class="btn-secondary" onclick="closeMenu()">とじる</button>
         </div>
+    </div>
 
-        <!-- ③ バトル画面 -->
-        <div id="screen-battle" class="screen" style="display: none;">
-            <div id="player"></div>
-            <div id="enemy"></div>
-
-            <div id="clock-area">
-                <div id="clock-face">
-                    <canvas class="hand-canvas" id="hand-canvas"></canvas>
+    <!-- しれいしつ（シンカリオン選択） -->
+    <div id="shireishitsu-overlay">
+        <div id="shireishitsu-box">
+            <div id="commander-intro">
+                <div id="commander-face"></div>
+                <div class="speech-bubble">たたかうシンカリオンをえらんでくれ！</div>
+            </div>
+            <!-- 顔部画像の格子状リスト -->
+            <div id="character-grid"></div>
+            
+            <!-- 選択されたキャラクターのプレビューエリア -->
+            <div id="character-preview-area">
+                <!-- シンカリオンのプレビュー画像 -->
+                <div id="character-preview-img"></div>
+                
+                <!-- テキスト情報エリア -->
+                <div id="character-preview-info">
+                    <div id="character-preview-name">機体名</div>
+                    <div class="profile-row"><span class="p-label">そうび</span><span class="p-colon">:</span><span id="profile-soubi"></span></div>
+                    <div class="profile-row"><span class="p-label">ひっさつ</span><span class="p-colon">:</span><span id="profile-hissatsu"></span></div>
+                    <div class="profile-row"><span class="p-label">うんてんし</span><span class="p-colon">:</span><span id="profile-untenshi"></span></div>
                 </div>
-            </div>
 
-            <div id="ui-panel-left">
-                <div class="badge-row">
-                    <div class="badge" id="score-badge">たおしたてき: 0</div>
-                </div>
-                <button id="back-to-map-btn">マップへ</button>
-            </div>
-
-            <div id="ui-panel-right">
-                <div class="hp-container">
-                    <span class="hp-label" style="color:#38bdf8;">PLAYER</span>
-                    <div class="hp-bar" id="player-hp-bar"></div>
-                </div>
-                <div class="hp-container">
-                    <span class="hp-label" style="color:#ef4444;">ENEMY</span>
-                    <div class="hp-bar" id="enemy-hp-bar"></div>
-                </div>
-                <!-- クリティカルタイマーバー -->
-                <div id="critical-timer-container">
-                    <div id="critical-timer-bar"></div>
-                </div>
-            </div>
-
-            <!-- クリティカルヒット カットイン演出 -->
-            <div id="critical-cutin">
-                <div id="critical-cutin-image"></div>
-                <div class="cutin-text">クリティカルヒット！</div>
-            </div>
-
-            <!-- バトル中セリフポップアップ演出 -->
-            <div id="battle-pilot-speech">
-                <div id="battle-pilot-face"></div>
-                <div id="battle-pilot-bubble">セリフ</div>
-            </div>
-
-            <div id="bottom-panel">
-                <div class="time-panel">
-                    <div class="time-block">
-                        <div class="stepper-row">
-                            <button class="step-btn" id="hour-up">▲</button>
-                            <div class="digital-display hour-color" id="display-hour">12</div>
-                            <button class="step-btn" id="hour-down">▼</button>
-                        </div>
-                        <div class="unit-label unit-hour">じ (時)</div>
-                    </div>
-                    <div class="colon">:</div>
-                    <div class="time-block">
-                        <div class="stepper-row">
-                            <button class="step-btn" id="min-up10">▲</button>
-                            <div class="digital-display minute-color" id="display-min">00</div>
-                            <button class="step-btn" id="min-down10">▼</button>
-                        </div>
-                        <div class="unit-label unit-minute">ふん (分)</div>
-                    </div>
-                </div>
-                <button id="decide-btn">こうげきする</button>
-            </div>
-
-            <div id="message-overlay"></div>
-        </div>
-
-        <!-- メニューやステージ選択のポップアップ -->
-        <div id="menu-overlay">
-            <div class="popup-box">
-                <h2>メニュー</h2>
-                <button class="btn-secondary" id="menu-close">とじる</button>
-            </div>
-        </div>
-
-        <div id="node-popup">
-            <div class="popup-box">
-                <h2 id="node-popup-title">ステージ</h2>
-                <button class="btn-primary" id="node-popup-battle">バトル開始</button>
-                <button class="btn-secondary" id="node-popup-close">キャンセル</button>
-            </div>
-        </div>
-
-        <!-- ローディング画面 -->
-        <div id="loading-overlay">
-            <div class="loading-box">
-                <div class="loading-spinner"></div>
-                <div id="loading-text">よみこみ中...</div>
+                <!-- プレビューエリア内の右下に重ねて配置する運転士の顔画像 -->
+                <div id="character-preview-pilot"></div>
             </div>
         </div>
     </div>
 
-    <!-- 外部のJavaScriptファイルを読み込みます -->
-    <script src="game.js"></script>
+    <!-- ③ バトル画面 -->
+    <div id="screen-battle" class="screen" style="display:none;">
+        <div id="ui-panel-left">
+            <div class="badge-row">
+                <div class="badge" id="stage-text">ステージ 1-1</div>
+                <div class="badge" id="score-text">たおしたてき: 0</div>
+                <button id="back-to-map-btn" onclick="backToMap()">🏠マップへ</button>
+            </div>
+            <div class="hp-container">
+                <span class="hp-label">HP</span>
+                <div class="hp-bar" id="player-hp"></div>
+            </div>
+        </div>
+
+        <div id="ui-panel-right">
+            <div class="hp-container">
+                <div class="hp-bar" id="enemy-hp"></div>
+                <span class="hp-label">HP</span>
+            </div>
+        </div>
+
+        <div id="message-overlay">ステージクリア！</div>
+
+        <div id="clock-area">
+            <div id="clock-face">
+                <canvas id="handCanvas" width="330" height="330" class="hand-canvas"></canvas>
+            </div>
+        </div>
+
+        <div id="player"></div>
+        <div id="enemy"></div>
+
+        <!-- クリティカルヒット時のカットイン演出 -->
+        <div id="critical-cutin">
+            <div id="critical-cutin-image"></div>
+            <div class="cutin-text">クリティカルヒット！</div>
+        </div>
+
+        <div id="bottom-panel">
+            <!-- 10秒クリティカルタイマーバー -->
+            <div id="critical-timer-container">
+                <div id="critical-timer-bar"></div>
+            </div>
+
+            <div class="time-panel">
+                <div class="time-block">
+                    <div class="stepper-row">
+                        <button class="step-btn" onclick="changeHour(-1)">▼</button>
+                        <div class="digital-display hour-color" id="hour-display">03</div>
+                        <button class="step-btn" onclick="changeHour(1)">▲</button>
+                    </div>
+                    <div class="unit-label unit-hour">じ</div>
+                </div>
+
+                <div class="colon">:</div>
+
+                <div class="time-block">
+                    <div class="stepper-row">
+                        <button class="step-btn" onclick="changeMinute()">▼</button>
+                        <div class="digital-display minute-color" id="minute-display">00</div>
+                        <button class="step-btn" onclick="changeMinute()">▲</button>
+                    </div>
+                    <div class="unit-label unit-minute">ふん</div>
+                </div>
+            </div>
+
+            <button id="decide-btn" onclick="checkAnswer()">⚡ こうげきする ⚡</button>
+        </div>
+    </div>
+
+    <!-- ローディング画面 -->
+    <div id="loading-overlay">
+        <div class="loading-box">
+            <div class="loading-spinner"></div>
+            <div id="loading-text">よみこみ中...</div>
+        </div>
+    </div>
+</div>
+
+<script src="game.js?v=7"></script>
+
 </body>
 </html>
