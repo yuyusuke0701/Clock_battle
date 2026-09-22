@@ -398,22 +398,22 @@ body {
     padding-right: 75px; /* 右下の顔画像と被らないように余白を確保 */
 }
 
-/* ▼ プレビューエリア内の右下に配置する運転士の顔画像（四角・角丸・前面表示） */
+/* ▼ プレビューエリア内の右下に配置する運転士の顔画像 */
 #character-preview-pilot {
     position: absolute;
     right: 12px;
     bottom: 12px;
     width: 68px;
     height: 68px;
-    border-radius: 8px;     /* 四角（角丸） */
+    border-radius: 8px;
     background-size: cover;
     background-position: center;
     border: 2px solid #fff;
     box-shadow: 0 0 10px rgba(0,0,0,0.7);
     flex-shrink: 0;
-    display: none;          /* JS側で表示制御 */
+    display: none;
     background-color: #000;
-    z-index: 10;            /* 前面表示 */
+    z-index: 10;
 }
 
 .preview-label {
@@ -906,6 +906,69 @@ body {
     0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
     60% { transform: translate(-50%, -50%) scale(1.12); opacity: 1; }
     100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* ==========================================================
+   バトル中運転士吹き出し用スタイル (追加)
+   ========================================================== */
+#battle-speech-overlay {
+    position: absolute;
+    bottom: 140px;
+    left: 15px;
+    right: 15px;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    z-index: 120;
+    pointer-events: none;
+    display: none; /* JSで表示制御 */
+}
+#battle-speech-overlay.show {
+    display: flex;
+    animation: fadeInSpeech 0.2s ease forwards;
+}
+@keyframes fadeInSpeech {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#battle-speech-pilot {
+    width: 64px;
+    height: 64px;
+    background: #000;
+    border: 2px solid #fff;
+    border-radius: 12px;
+    flex-shrink: 0;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+}
+
+#battle-speech-bubble {
+    background: rgba(255, 255, 255, 0.95);
+    color: #111;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.4;
+    flex: 1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    position: relative;
+    border: 2px solid #38bdf8;
+    text-shadow: none;
+}
+
+#battle-speech-bubble::before {
+    content: '';
+    position: absolute;
+    bottom: 12px;
+    left: -9px;
+    border-width: 6px 10px 6px 0;
+    border-style: solid;
+    border-color: transparent rgba(255, 255, 255, 0.95) transparent transparent;
+    display: block;
+    width: 0;
 }
 
 /* ローディング画面 */
