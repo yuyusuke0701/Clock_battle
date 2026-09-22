@@ -911,7 +911,7 @@ body {
 /* ==========================================================
    バトル中：画面中央の吹き出しポップアップ演出
    ========================================================== */
-#battle-speech-overlay {
+#battle-pilot-speech {
     position: absolute;
     top: 45%;
     left: 50%;
@@ -932,7 +932,7 @@ body {
     transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-#battle-speech-overlay.show {
+#battle-pilot-speech.show {
     display: flex;
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
@@ -945,7 +945,7 @@ body {
     100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
-#battle-speech-pilot {
+#battle-pilot-face {
     width: 64px;
     height: 64px;
     background: #000;
@@ -957,7 +957,7 @@ body {
     box-shadow: 0 0 12px rgba(56,189,248,0.8);
 }
 
-#battle-speech-bubble {
+#battle-pilot-bubble {
     background: #fff;
     color: #111;
     padding: 10px 14px;
@@ -975,7 +975,7 @@ body {
 }
 
 /* 吹き出しのしっぽ（左側の顔に向かって配置する場合） */
-#battle-speech-bubble::before {
+#battle-pilot-bubble::before {
     content: '';
     position: absolute;
     top: 50%;
