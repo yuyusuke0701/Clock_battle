@@ -883,7 +883,7 @@ function executeActualBattleStart(nodeIndex) {
     generateQuestion();
 
     // バトル開始時の意気込みコメントを表示
-    showPilotSpeech('start', 3500);
+    showPilotSpeech('start', 1000);
 }
 
 function backToMap() {
@@ -909,7 +909,7 @@ function handleCorrect() {
     const damage = isCritical ? 2 : 1;
 
     if (isCritical) {
-        showPilotSpeech('critical', 2500);
+        showPilotSpeech('critical', 1000);
         showCriticalCutin(() => {
             executeAttackAfterCutin(damage);
         });
@@ -970,7 +970,7 @@ function executeAttackAfterCutin(damage) {
         const scoreText = document.getElementById('score-text');
         if (scoreText) scoreText.innerText = "たおしたてき: " + score;
 
-        showPilotSpeech('win', 2500);
+        showPilotSpeech('win', 2000);
         showMessage("てきを たおした！", 2000);
 
         const enemy = document.getElementById('enemy');
@@ -1023,7 +1023,7 @@ function handleWrong() {
 
         // 敗北時
         isLocked = true;
-        showPilotSpeech('lose', 2500);
+        showPilotSpeech('lose', 2000);
         showMessage("ゲームオーバー！", 1800);
         setTimeout(() => {
             hidePilotSpeech();
