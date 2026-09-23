@@ -1,5 +1,5 @@
 /* ===================================================================
-    画面サイズ対応：常に固定レイアウトを拡大縮小するだけにする
+    ゲームファイル Part 1 (前半)
 ================================================================== */
 function fitGame() {
     const container = document.getElementById('game-container');
@@ -10,9 +10,6 @@ function fitGame() {
 window.addEventListener('resize', fitGame);
 window.addEventListener('orientationchange', fitGame);
 
-/* ===================================================================
-    サウンド関連
-================================================================== */
 let soundOn = true;
 
 const STAGE_BGMS = {
@@ -127,9 +124,6 @@ function toggleSound() {
     }
 }
 
-/* ===================================================================
-    ゲームデータ ＆ キャラクタープロフィール
-================================================================== */
 const STAGES = [
     { id: 1, bg: 'Images/stage/map01_メタバース空間.png' },
     { id: 2, bg: 'Images/stage/map02_森.png' },
@@ -149,7 +143,7 @@ const NODE_POSITIONS = [
     { x: 50, y: 68 },
     { x: 68, y: 40 },
     { x: 82, y: 65 },
-    { x: 50, y: 18 } // ボス
+    { x: 50, y: 18 }
 ];
 
 const CHARACTERS = [
@@ -179,9 +173,6 @@ const SHINKALION_PROFILES = {
     "zero": { name: "シンカリオン ０", soubi: "ゼロブレード", untenshi: "工部 レイジ" }
 };
 
-/* ===================================================================
-    シンカリオン・運転士の対応データ
-================================================================== */
 const PILOT_IMAGES = {
     "500kodama": "Images/CW/yamato_up.png",
     "e5hayabusa": "Images/CW/taisei_up.png",
@@ -197,19 +188,11 @@ const PILOT_IMAGES = {
 };
 
 const NORMAL_ENEMY_IMAGES_1_5 = [
-    'Images/CW/敵1.png',
-    'Images/CW/敵2.png',
-    'Images/CW/敵3.png',
-    'Images/CW/敵4.png',
-    'Images/CW/敵5.png'
+    'Images/CW/敵1.png', 'Images/CW/敵2.png', 'Images/CW/敵3.png', 'Images/CW/敵4.png', 'Images/CW/敵5.png'
 ];
 
 const NORMAL_ENEMY_IMAGES_6_10 = [
-    'Images/CW/敵6.png',
-    'Images/CW/敵7.png',
-    'Images/CW/敵8.png',
-    'Images/CW/敵9.png',
-    'Images/CW/敵10.png'
+    'Images/CW/敵6.png', 'Images/CW/敵7.png', 'Images/CW/敵8.png', 'Images/CW/敵9.png', 'Images/CW/敵10.png'
 ];
 
 const SAVE_KEY = 'shinkalion_clock_master_save_v1';
@@ -242,9 +225,6 @@ let currentScreen = 'top';
 let currentStageId = progress.unlockedStage;
 let pendingNodeIndex = null;
 
-/* ===================================================================
-    画面切り替え
-================================================================== */
 function showScreen(name) {
     const sTop = document.getElementById('screen-top');
     const sMap = document.getElementById('screen-map');
@@ -263,9 +243,6 @@ function startGame() {
     enterMap(true);
 }
 
-/* ===================================================================
-    マップ画面
-================================================================== */
 function playStageIntro(stageId) {
     const intro = document.getElementById('stage-intro');
     const text = document.getElementById('stage-intro-text');
@@ -389,9 +366,6 @@ function confirmBattleStart() {
     startBattle(pendingNodeIndex);
 }
 
-/* ===================================================================
-    メニュー / しれいしつ ＆ プロフィール表示更新
-================================================================== */
 function openMenu() {
     playSfx('select');
     const menu = document.getElementById('menu-overlay');
@@ -431,7 +405,6 @@ function updateCharacterPreview(charKey) {
         previewImg.style.backgroundImage = "url('" + charDef.img + "')";
     }
 
-    // プレビュー右下に対応する運転士の顔画像を設定
     if (previewPilot) {
         const pilotImg = PILOT_IMAGES[charKey] || '';
         if (pilotImg) {
@@ -479,9 +452,8 @@ function renderShireishitsu() {
 
     updateCharacterPreview(progress.selectedCharacter);
 }
-
 /* ===================================================================
-    バトル画面 ＆ クリティカル機能
+    ゲームファイル Part 2 (後半)
 ================================================================== */
 let currentHour = 3;
 let currentMinute = 0;
@@ -676,9 +648,6 @@ function checkAnswer() {
     }
 }
 
-/* ===================================================================
-    ローディング画面の制御
-================================================================== */
 function showLoading(text) {
     const overlay = document.getElementById('loading-overlay');
     const textEl = document.getElementById('loading-text');
@@ -697,9 +666,6 @@ function hideLoading() {
     }
 }
 
-/* ===================================================================
-    バトル開始処理 ＆ 画像ローディング対応
-================================================================== */
 function startBattle(nodeIndex) {
     showLoading("バトルじゅんび中...");
 
@@ -915,10 +881,32 @@ function handleWrong() {
     }, 150);
 }
 
-/* ===================================================================
-    初期化
-================================================================== */
 window.onload = function() {
     fitGame();
     showScreen('top');
+
+    const bindClick = (id, handler) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', handler);
+    };
+
+    bindClick('start-btn', startGame);
+    bindClick('sound-toggle', toggleSound);
+    bindClick('prev-arrow', prevStage);
+    bindClick('next-arrow', nextStage);
+    bindClick('menu-btn', openMenu);
+    bindClick('menu-close', closeMenu);
+    bindClick('shireishitsu-btn', openShireishitsu);
+    bindClick('shireishitsu-sortie', closeShireishitsu);
+
+    bindClick('node-popup-battle', confirmBattleStart);
+    bindClick('node-popup-close', closeNodePopup);
+
+    bindClick('hour-up', () => changeHour(1));
+    bindClick('hour-down', () => changeHour(-1));
+    bindClick('minute-up', changeMinute);
+    bindClick('minute-down', changeMinute);
+
+    bindClick('decide-btn', checkAnswer);
+    bindClick('back-to-map-btn', backToMap);
 };
