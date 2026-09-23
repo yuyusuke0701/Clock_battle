@@ -890,23 +890,8 @@ window.onload = function() {
         if (el) el.addEventListener('click', handler);
     };
 
-    bindClick('start-btn', startGame);
-    bindClick('sound-toggle', toggleSound);
-    bindClick('prev-arrow', prevStage);
-    bindClick('next-arrow', nextStage);
-    bindClick('menu-btn', openMenu);
-    bindClick('menu-close', closeMenu);
-    bindClick('shireishitsu-btn', openShireishitsu);
+    // 下記のボタン群はindex.html側に onclick="..." が既に書かれているため、
+    // ここで再度bindClickすると1回のタップで処理が2回走ってしまう(二重ダメージ等の原因)。
+    // そのためbindClickが必要なのは、HTML側にonclickが無い要素だけにする。
     bindClick('shireishitsu-sortie', closeShireishitsu);
-
-    bindClick('node-popup-battle', confirmBattleStart);
-    bindClick('node-popup-close', closeNodePopup);
-
-    bindClick('hour-up', () => changeHour(1));
-    bindClick('hour-down', () => changeHour(-1));
-    bindClick('minute-up', changeMinute);
-    bindClick('minute-down', changeMinute);
-
-    bindClick('decide-btn', checkAnswer);
-    bindClick('back-to-map-btn', backToMap);
 };
