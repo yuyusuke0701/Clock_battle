@@ -612,9 +612,15 @@ function drawClockHands(hour, minute) {
     ctx.fill();
 }
 
+// ステージ6〜10は15分刻み、ステージ1〜5は30分刻み（難易度アップ）
+function getMinuteOptions() {
+    return currentStageId >= 6 ? [0, 15, 30, 45] : [0, 30];
+}
+
 function generateQuestion() {
     targetHour = Math.floor(Math.random() * 12) + 1;
-    targetMinute = Math.random() < 0.5 ? 0 : 30;
+    const minuteOptions = getMinuteOptions();
+    targetMinute = minuteOptions[Math.floor(Math.random() * minuteOptions.length)];
     drawClockHands(targetHour, targetMinute);
     startCriticalTimer();
 }
@@ -632,7 +638,9 @@ function changeHour(delta) {
 function changeMinute() {
     if (isLocked) return;
     playSfx('select');
-    currentMinute = currentMinute === 0 ? 30 : 0;
+    const minuteOptions = getMinuteOptions();
+    const idx = minuteOptions.indexOf(currentMinute);
+    currentMinute = minuteOptions[(idx === -1 ? 0 : idx + 1) % minuteOptions.length];
     const mDisp = document.getElementById('minute-display');
     if (mDisp) mDisp.innerText = String(currentMinute).padStart(2, '0');
 }
@@ -739,6 +747,12 @@ function executeActualBattleStart(nodeIndex) {
     }
 
     isLocked = false;
+
+    // ステージが変わることで選べる分の選択肢が変わるため、分の表示をリセットする
+    currentMinute = 0;
+    const mDisp = document.getElementById('minute-display');
+    if (mDisp) mDisp.innerText = '00';
+
     generateQuestion();
 }
 
