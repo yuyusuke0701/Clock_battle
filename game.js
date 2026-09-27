@@ -1,5 +1,5 @@
 /* ===================================================================
-    ゲームファイル Part 1 (前半)
+    ゲームファイル Part 1 (前半) - 機体・運転士データ統合版
 ================================================================== */
 function fitGame() {
     const container = document.getElementById('game-container');
@@ -146,7 +146,9 @@ const NODE_POSITIONS = [
     { x: 50, y: 18 }
 ];
 
+/* 機体データ（既存＋画像追加分） */
 const CHARACTERS = [
+    /* 既存（チェンジニアリング） */
     { id: 'e5hayabusa', name: 'E5 はやぶさ', img: 'Images/CW/e5hayabusa.png' },
     { id: 'e6komachi', name: 'E6 こまち', img: 'Images/CW/e6komachi.png' },
     { id: 'e7kagayaki', name: 'E7 かがやき', img: 'Images/CW/e7kagayaki.png' },
@@ -155,10 +157,36 @@ const CHARACTERS = [
     { id: 'n700skamome', name: 'N700S かもめ', img: 'Images/CW/n700skamome.png' },
     { id: 'n700snozomi', name: 'N700S のぞみ', img: 'Images/CW/n700snozomi.png' },
     { id: 'yellow', name: 'ドクターイエロー', img: 'Images/CW/yellow.png' },
-    { id: 'srg', name: 'SRG', img: 'Images/CW/srg.png' }     
+    { id: 'srg', name: 'SRG', img: 'Images/CW/srg.png' },
+    
+    /* 今回追加分（画像より）[cite: 11] */
+    { id: 'shin_500kodama', name: '500 こだま', img: 'Images/1/shin/500kodama.png' },
+    { id: 'shin_700hikarirailstar', name: '700 ひかりレールスター', img: 'Images/1/shin/700hikarirailstar.png' },
+    { id: 'shin_700nozomi', name: '700 のぞみ', img: 'Images/1/shin/700nozomi.png' },
+    { id: 'shin_800tsubame', name: '800 つばめ', img: 'Images/1/shin/800tsubame.png' },
+    { id: 'shin_923yellow', name: '923 ドクターイエロー', img: 'Images/1/shin/923yellow.png' },
+    { id: 'shin_Trinity', name: 'トリニティー', img: 'Images/1/shin/Trinity.png' },
+    { id: 'shin_alfax', name: 'ALFA-X', img: 'Images/1/shin/alfax.png' },
+    { id: 'shin_black', name: 'ブラックシンカリオン', img: 'Images/1/shin/black.png' },
+    { id: 'shin_blackdragoon', name: 'ブラックシンカリオン ドラグーンモード', img: 'Images/1/shin/blackdragoon.png' },
+    { id: 'shin_blackkurenai', name: 'ブラックシンカリオン 紅', img: 'Images/1/shin/blackkurenai.png' },
+    { id: 'shin_blackkoga', name: 'ブラックシンカリオン オーガ', img: 'Images/1/shin/blackkoga.png' },
+    { id: 'shin_e3tsubasa', name: 'E3つばさ', img: 'Images/1/shin/e3tsubasa.png' },
+    { id: 'shin_e3tsubasawing', name: 'E3つばさ アイアンウイング', img: 'Images/1/shin/e3tsubasawing.png' },
+    { id: 'shin_e5hayabusa', name: 'E5はやぶさ', img: 'Images/1/shin/e5hayabusa.png' },
+    { id: 'shin_e5hayabusamk2', name: 'E5はやぶさ マークⅡ', img: 'Images/1/shin/e5hayabusamk2.png' },
+    { id: 'shin_e5x500', name: 'E5 x 500', img: 'Images/1/shin/e5x500.png' },
+    { id: 'shin_e5xyellow', name: 'E5 x ドクターイエロー', img: 'Images/1/shin/e5xyellow.png' },
+    { id: 'shin_e6komachi', name: 'E6こまち', img: 'Images/1/shin/e6komachi.png' },
+    { id: 'shin_e7kagayaki', name: 'E7かがやき', img: 'Images/1/shin/e7kagayaki.png' },
+    { id: 'shin_h5hayabusa', name: 'H5はやぶさ', img: 'Images/1/shin/h5hayabusa.png' },
+    { id: 'shin_n700anozomi', name: 'N700Aのぞみ', img: 'Images/1/shin/n700anozomi.png' },
+    { id: 'shin_n700mizuho', name: 'N700みずほ', img: 'Images/1/shin/n700mizuho.png' },
+    { id: 'shin_yellow', name: 'ドクターイエロー', img: 'Images/1/shin/yellow.png' }
 ];
 
 const SHINKALION_PROFILES = {
+    /* 既存（チェンジニアリング）のプロフィール・運転士情報 */
     "500kodama": { name: "５００こだまジンキフォーム", soubi: "ダイナミックギガスパナ", untenshi: "西大路 ヤマト" },
     "e5hayabusa": { name: "Ｅ５はやぶさトレーラーフォーム", soubi: "リクソウセイバー", untenshi: "大成 タイセイ" },
     "e6komachi": { name: "Ｅ６こまちトップリフターフォーム", soubi: "キンテイガン", untenshi: "フォールデンアカネ" },
@@ -170,10 +198,36 @@ const SHINKALION_PROFILES = {
     "phantom": { name: "ファントムシンカリオン", soubi: "ファントムガントレットソード", untenshi: "大成 イナ" },
     "srg": { name: "シンカリオンＳＲＧ", soubi: "SRGリクソウセイバー", untenshi: "タイセイ・アカネ・リョータ" },
     "yellow": { name: "グレートドクターイエロー", soubi: "グレートケンソクブレード", untenshi: "梔子 モリト" },
-    "zero": { name: "シンカリオン ０", soubi: "ゼロブレード", untenshi: "工部 レイジ" }
+    "zero": { name: "シンカリオン ０", soubi: "ゼロブレード", untenshi: "工部 レイジ" },
+
+    /* 今回追加分（画像より）[cite: 11] */
+    "shin_500kodama": { name: "500 こだま", soubi: "ミサイルシールド", untenshi: "速杉 ホクト" },
+    "shin_700hikarirailstar": { name: "700 ひかりレールスター", soubi: "カンカンガン", untenshi: "五ツ橋 ギン" },
+    "shin_700nozomi": { name: "700 のぞみ", soubi: "シンカブレード", untenshi: "五ツ橋 ジョウ" },
+    "shin_800tsubame": { name: "800 つばめ", soubi: "パンタグラフアロー", untenshi: "大空 レイ" },
+    "shin_923yellow": { name: "923 ドクターイエロー", soubi: "コウソクナガエ", untenshi: "清洲 リュウジ" },
+    "shin_Trinity": { name: "トリニティー", soubi: "シンカイサツソード", untenshi: "五ツ橋 ジョウ" },
+    "shin_alfax": { name: "ALFA-X", soubi: "シャリュウブレード", untenshi: "速杉 ホクト" },
+    "shin_black": { name: "ブラックシンカリオン", soubi: "ダークカイサツソード", untenshi: "セイリュウ" },
+    "shin_blackdragoon": { name: "ブラックシンカリオン ドラグーンモード", soubi: "ダークカイサツソード", untenshi: "セイリュウ" },
+    "shin_blackkurenai": { name: "ブラックシンカリオン 紅", soubi: "紅ペニカイサツソード", untenshi: "セイリュウ" },
+    "shin_blackkoga": { name: "ブラックシンカリオン オーガ", soubi: "フリージアソード", untenshi: "セイリュウ" },
+    "shin_e3tsubasa": { name: "E3つばさ", soubi: "フミキリ手裏剣", untenshi: "月山 シノブ" },
+    "shin_e3tsubasawing": { name: "E3つばさ アイアンウイング", soubi: "アイアンウイング手裏剣", untenshi: "月山 シノブ" },
+    "shin_e5hayabusa": { name: "E5はやぶさ", soubi: "カイサツソード", untenshi: "速杉 ハヤト" },
+    "shin_e5hayabusamk2": { name: "E5はやぶさ マークⅡ", soubi: "カイサツソード", untenshi: "速杉 ハヤト" },
+    "shin_e5x500": { name: "E5 x 500", soubi: "カイサツソード", untenshi: "速杉 ハヤト" },
+    "shin_e5xyellow": { name: "E5 x ドクターイエロー", soubi: "フルアクセルグランクロス", untenshi: "速杉 ハヤト" },
+    "shin_e6komachi": { name: "E6こまち", soubi: "フミキリガン", untenshi: "男鹿 アキタ" },
+    "shin_e7kagayaki": { name: "E7かがやき", soubi: "シャリシールド", untenshi: "大門山 ツラヌキ" },
+    "shin_h5hayabusa": { name: "H5はやぶさ", soubi: "夕張メロンウイング", untenshi: "発音 ミク" },
+    "shin_n700anozomi": { name: "N700Aのぞみ", soubi: "カイサツブレイカー", untenshi: "清洲 リュウジ" },
+    "shin_n700mizuho": { name: "N700みずほ", soubi: "ドウリンハンマー", untenshi: "霧島 タカトラ" },
+    "shin_yellow": { name: "ドクターイエロー", soubi: "コウソクナガエ", untenshi: "清洲 リュウジ" }
 };
 
 const PILOT_IMAGES = {
+    /* 既存（チェンジニアリング）の運転士画像 */
     "500kodama": "Images/CW/yamato_up.png",
     "e5hayabusa": "Images/CW/taisei_up.png",
     "e6komachi": "Images/CW/akane_up.png",
@@ -184,16 +238,34 @@ const PILOT_IMAGES = {
     "n700snozomi": "Images/CW/ten_up.png",
     "srg": "Images/CW/3pilots.jpg",
     "yellow": "Images/CW/morito_up.png",
-    "zero": "Images/CW/reiji_up.png"
+    "zero": "Images/CW/reiji_up.png",
+    "phantom": "Images/CW/ina_up.png",
+
+    /* 今回追加分（初代シンカリオン系）の運転士画像 */
+    "shin_500kodama": "Images/1/cha/hokuto_up.png",
+    "shin_700hikarirailstar": "Images/1/cha/gin_up.png",
+    "shin_700nozomi": "Images/1/cha/jou_up.png",
+    "shin_800tsubame": "Images/1/cha/rei_up.png",
+    "shin_923yellow": "Images/1/cha/ryuji_up.png",
+    "shin_Trinity": "Images/1/cha/jou_up.png",
+    "shin_alfax": "Images/1/cha/hokutoyoung_up.png",
+    "shin_black": "Images/1/cha/seiryu_up.png",
+    "shin_blackdragoon": "Images/1/cha/seiryu_up.png",
+    "shin_blackkurenai": "Images/1/cha/seiryu_up.png",
+    "shin_blackkoga": "Images/1/cha/seiryu_up.png",
+    "shin_e3tsubasa": "Images/1/cha/shinobu_up.png",
+    "shin_e3tsubasawing": "Images/1/cha/shinobu_up.png",
+    "shin_e5hayabusa": "Images/1/cha/hayato_up.png",
+    "shin_e5hayabusamk2": "Images/1/cha/hayato_up.png",
+    "shin_e5x500": "Images/1/cha/hayato_up.png",
+    "shin_e5xyellow": "Images/1/cha/hayato_up.png",
+    "shin_e6komachi": "Images/1/cha/akita_up.png",
+    "shin_e7kagayaki": "Images/1/cha/turanuki_up.png",
+    "shin_h5hayabusa": "Images/1/cha/miku_up.png",
+    "shin_n700anozomi": "Images/1/cha/ryuji_up.png",
+    "shin_n700mizuho": "Images/1/cha/takatora_up.png",
+    "shin_yellow": "Images/1/cha/ryuji_up.png"
 };
-
-const NORMAL_ENEMY_IMAGES_1_5 = [
-    'Images/CW/敵1.png', 'Images/CW/敵2.png', 'Images/CW/敵3.png', 'Images/CW/敵4.png', 'Images/CW/敵5.png'
-];
-
-const NORMAL_ENEMY_IMAGES_6_10 = [
-    'Images/CW/敵6.png', 'Images/CW/敵7.png', 'Images/CW/敵8.png', 'Images/CW/敵9.png', 'Images/CW/敵10.png'
-];
 
 const SAVE_KEY = 'shinkalion_clock_master_save_v1';
 
@@ -612,7 +684,6 @@ function drawClockHands(hour, minute) {
     ctx.fill();
 }
 
-// ステージ6〜10は15分刻み、ステージ1〜5は30分刻み（難易度アップ）
 function getMinuteOptions() {
     return currentStageId >= 6 ? [0, 15, 30, 45] : [0, 30];
 }
@@ -681,7 +752,7 @@ function startBattle(nodeIndex) {
     const stageDef = STAGES[currentStageId - 1];
     
     const charDef = CHARACTERS.find(c => c.id === progress.selectedCharacter) || CHARACTERS[0];
-    const enemyImgPath = isBoss ? 'Images/CW/hades.png' : (currentStageId <= 5 ? NORMAL_ENEMY_IMAGES_1_5[0] : NORMAL_ENEMY_IMAGES_6_10[0]);
+    const enemyImgPath = isBoss ? 'Images/CW/hades.png' : (currentStageId <= 5 ? 'Images/CW/敵1.png' : 'Images/CW/敵6.png');
     const bgImgPath = stageDef.bg;
 
     let loadedCount = 0;
@@ -729,7 +800,7 @@ function executeActualBattleStart(nodeIndex) {
         if (isBoss) {
             enemyEl.style.backgroundImage = "url('Images/CW/hades.png')";
         } else {
-            const enemyList = currentStageId <= 5 ? NORMAL_ENEMY_IMAGES_1_5 : NORMAL_ENEMY_IMAGES_6_10;
+            const enemyList = currentStageId <= 5 ? ['Images/CW/敵1.png', 'Images/CW/敵2.png', 'Images/CW/敵3.png', 'Images/CW/敵4.png', 'Images/CW/敵5.png'] : ['Images/CW/敵6.png', 'Images/CW/敵7.png', 'Images/CW/敵8.png', 'Images/CW/敵9.png', 'Images/CW/敵10.png'];
             const randomEnemy = enemyList[Math.floor(Math.random() * enemyList.length)];
             enemyEl.style.backgroundImage = "url('" + randomEnemy + "')";
         }
@@ -748,7 +819,6 @@ function executeActualBattleStart(nodeIndex) {
 
     isLocked = false;
 
-    // ステージが変わることで選べる分の選択肢が変わるため、分の表示をリセットする
     currentMinute = 0;
     const mDisp = document.getElementById('minute-display');
     if (mDisp) mDisp.innerText = '00';
@@ -904,8 +974,5 @@ window.onload = function() {
         if (el) el.addEventListener('click', handler);
     };
 
-    // 下記のボタン群はindex.html側に onclick="..." が既に書かれているため、
-    // ここで再度bindClickすると1回のタップで処理が2回走ってしまう(二重ダメージ等の原因)。
-    // そのためbindClickが必要なのは、HTML側にonclickが無い要素だけにする。
     bindClick('shireishitsu-sortie', closeShireishitsu);
 };
