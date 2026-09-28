@@ -123,6 +123,12 @@
             <div class="cutin-text">クリティカルヒット！</div>
         </div>
 
+        <!-- 運転士コメントポップアップ（クリティカル・勝利・ゲームオーバー時） -->
+        <div id="pilot-popup">
+            <div id="pilot-popup-face"></div>
+            <div class="pilot-bubble" id="pilot-popup-text"></div>
+        </div>
+
         <div id="bottom-panel">
             <!-- 10秒クリティカルタイマーバー -->
             <div id="critical-timer-container">
@@ -143,9 +149,9 @@
 
                 <div class="time-block">
                     <div class="stepper-row">
-                        <button class="step-btn" onclick="changeMinute()">▼</button>
+                        <button class="step-btn" onclick="changeMinute(-1)">▼</button>
                         <div class="digital-display minute-color" id="minute-display">00</div>
-                        <button class="step-btn" onclick="changeMinute()">▲</button>
+                        <button class="step-btn" onclick="changeMinute(1)">▲</button>
                     </div>
                     <div class="unit-label unit-minute">ふん</div>
                 </div>

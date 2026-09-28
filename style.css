@@ -721,6 +721,58 @@ body {
     animation: cutinImageAnim 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
 }
 
+/* ===== 運転士コメントポップアップ ===== */
+#pilot-popup {
+    position: absolute;
+    top: 62px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    z-index: 160;
+    opacity: 0;
+    transform: translateX(-24px);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+#pilot-popup.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+#pilot-popup-face {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center top;
+    background-color: #111;
+    border: 3px solid #fde047;
+    box-shadow: 0 0 14px rgba(253,224,71,0.7);
+    flex-shrink: 0;
+}
+.pilot-bubble {
+    position: relative;
+    background: #fff;
+    color: #111;
+    border-radius: 14px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1.4;
+    max-width: 300px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+.pilot-bubble::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: 18px;
+    border-width: 8px 10px 8px 0;
+    border-style: solid;
+    border-color: transparent #fff transparent transparent;
+}
+
 @keyframes cutinImageAnim {
     0% { transform: scale(0.2) translateY(30px); opacity: 0; }
     60% { transform: scale(1.05) translateY(-10px); opacity: 1; }

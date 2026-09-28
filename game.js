@@ -269,6 +269,36 @@ const PILOT_IMAGES = {
 
 const SAVE_KEY = 'shinkalion_clock_master_save_v1';
 
+// 運転士コメント（クリティカル・勝利・ゲームオーバー時のセリフ候補）
+const PILOT_LINES = {
+    critical: ["これで とどめだ！", "うけとれ！", "いまだ、こうげきしろ！"],
+    victory: ["やったぞ！", "しょうりだ！", "みんなの おかげだ！"],
+    gameover: ["くっ…たいせいを たてなおすぞ！", "まだまだ これからだ！", "もういちど ちょうせんしよう！"]
+};
+
+function showPilotComment(kind, duration) {
+    const popup = document.getElementById('pilot-popup');
+    const faceEl = document.getElementById('pilot-popup-face');
+    const textEl = document.getElementById('pilot-popup-text');
+    if (!popup || !faceEl || !textEl) return;
+
+    const charDef = CHARACTERS.find(c => c.id === progress.selectedCharacter) || CHARACTERS[0];
+    const pilotImg = PILOT_IMAGES[charDef.id];
+    faceEl.style.backgroundImage = pilotImg ? "url('" + pilotImg + "')" : 'none';
+
+    const lines = PILOT_LINES[kind] || [''];
+    textEl.innerText = lines[Math.floor(Math.random() * lines.length)];
+
+    popup.classList.remove('show');
+    void popup.offsetWidth;
+    popup.classList.add('show');
+
+    clearTimeout(popup._hideTimer);
+    popup._hideTimer = setTimeout(() => {
+        popup.classList.remove('show');
+    }, duration || 1800);
+}
+
 function loadProgress() {
     try {
         const raw = localStorage.getItem(SAVE_KEY);
@@ -706,12 +736,15 @@ function changeHour(delta) {
     if (hDisp) hDisp.innerText = String(currentHour).padStart(2, '0');
 }
 
-function changeMinute() {
+function changeMinute(delta) {
     if (isLocked) return;
     playSfx('select');
     const minuteOptions = getMinuteOptions();
+    const len = minuteOptions.length;
     const idx = minuteOptions.indexOf(currentMinute);
-    currentMinute = minuteOptions[(idx === -1 ? 0 : idx + 1) % minuteOptions.length];
+    const baseIdx = idx === -1 ? 0 : idx;
+    const nextIdx = ((baseIdx + delta) % len + len) % len; // 負数でも正しく循環させる
+    currentMinute = minuteOptions[nextIdx];
     const mDisp = document.getElementById('minute-display');
     if (mDisp) mDisp.innerText = String(currentMinute).padStart(2, '0');
 }
@@ -868,6 +901,7 @@ function showCriticalCutin(callback) {
 
         cutin.classList.add('show');
         playSfx('critical');
+        showPilotComment('critical', 1000);
 
         setTimeout(() => {
             cutin.classList.remove('show');
@@ -908,6 +942,7 @@ function executeAttackAfterCutin(damage) {
         if (scoreText) scoreText.innerText = "たおしたてき: " + score;
 
         showMessage("てきを たおした！", 2000);
+        showPilotComment('victory', 2000);
 
         const enemy = document.getElementById('enemy');
         const player = document.getElementById('player');
@@ -958,6 +993,7 @@ function handleWrong() {
 
         isLocked = true;
         showMessage("ゲームオーバー！", 1800);
+        showPilotComment('gameover', 1800);
         setTimeout(() => {
             enterMap(true);
             isLocked = false;
