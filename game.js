@@ -271,9 +271,27 @@ const SAVE_KEY = 'shinkalion_clock_master_save_v1';
 
 // 運転士コメント（クリティカル・勝利・ゲームオーバー時のセリフ候補）
 const PILOT_LINES = {
-    critical: ["これで とどめだ！", "うけとれ！", "いまだ、こうげきしろ！"],
-    victory: ["やったぞ！", "しょうりだ！", "みんなの おかげだ！"],
-    gameover: ["くっ…たいせいを たてなおすぞ！", "まだまだ これからだ！", "もういちど ちょうせんしよう！"]
+    critical: [
+        "これで とどめだ！",
+        "うけとれ！",
+        "いまだ、こうげきしろ！",
+        "ここで きめるぞ！",
+        "ぜんりょくで いくぞ！"
+    ],
+    victory: [
+        "やったぞ！",
+        "しょうりだ！",
+        "みんなの おかげだ！",
+        "よく やったな！",
+        "さいこうの けっかだ！"
+    ],
+    gameover: [
+        "くっ…たいせいを たてなおすぞ！",
+        "まだまだ これからだ！",
+        "もういちど ちょうせんしよう！",
+        "あきらめるな、たてなおすぞ！",
+        "つぎは かならず かつぞ！"
+    ]
 };
 
 function showPilotComment(kind, duration) {
@@ -498,7 +516,6 @@ function updateCharacterPreview(charKey) {
     const previewPilot = document.getElementById('character-preview-pilot');
     const previewName = document.getElementById('character-preview-name');
     const soubiEl = document.getElementById('profile-soubi');
-    const hissatsuEl = document.getElementById('profile-hissatsu');
     const untenshiEl = document.getElementById('profile-untenshi');
 
     const charDef = CHARACTERS.find(c => c.id === charKey) || CHARACTERS[0];
@@ -520,12 +537,10 @@ function updateCharacterPreview(charKey) {
     if (profile) {
         if (previewName) previewName.innerText = profile.name;
         if (soubiEl) soubiEl.innerText = profile.soubi;
-        if (hissatsuEl) hissatsuEl.innerText = profile.hissatsu;
         if (untenshiEl) untenshiEl.innerText = profile.untenshi;
     } else {
         if (previewName) previewName.innerText = charDef.name;
         if (soubiEl) soubiEl.innerText = "—";
-        if (hissatsuEl) hissatsuEl.innerText = "—";
         if (untenshiEl) untenshiEl.innerText = "—";
     }
 }
