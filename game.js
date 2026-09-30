@@ -170,7 +170,7 @@ const CHARACTERS = [
     { id: 'shin_black', name: 'ブラックシンカリオン', img: 'Images/1/shin/black.png' },
     { id: 'shin_blackdragoon', name: 'ブラックシンカリオン ドラグーンモード', img: 'Images/1/shin/blackdragoon.png' },
     { id: 'shin_blackkurenai', name: 'ブラックシンカリオン 紅', img: 'Images/1/shin/blackkurenai.png' },
-    { id: 'shin_blackkoga', name: 'ブラックシンカリオン オーガ', img: 'Images/1/shin/blackkoga.png' },
+    { id: 'shin_blackoga', name: 'ブラックシンカリオン オーガ', img: 'Images/1/shin/blackkoga.png' },
     { id: 'shin_e3tsubasa', name: 'E3つばさ', img: 'Images/1/shin/e3tsubasa.png' },
     { id: 'shin_e3tsubasawing', name: 'E3つばさ アイアンウイング', img: 'Images/1/shin/e3tsubasawing.png' },
     { id: 'shin_e5hayabusa', name: 'E5はやぶさ', img: 'Images/1/shin/e5hayabusa.png' },
